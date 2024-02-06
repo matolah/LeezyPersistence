@@ -41,7 +41,7 @@ public struct UserDefault<Value: PersistenceValue, Preferences: PreferencesProto
                 container.set(encoded, forKey: key)
                 instance.preferencesChangedSubject.send(wrappedKeyPath)
             } catch {
-                print(error)
+                instance.handle(error: error)
             }
         }
     }

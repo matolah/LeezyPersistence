@@ -9,4 +9,9 @@ public protocol PreferencesProtocol: AnyObject {
     var keychainManager: KeychainManagerProtocol { get }
     var userDefaults: UserDefaults { get }
     var preferencesChangedSubject: PassthroughSubject<AnyKeyPath, Never> { get }
+    func handle(error: Error)
+}
+
+public extension PreferencesProtocol {
+    func handle(error: Error) {}
 }

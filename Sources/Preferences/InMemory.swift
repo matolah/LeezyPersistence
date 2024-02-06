@@ -37,7 +37,7 @@ public struct InMemory<Value: PersistenceValue, Preferences: PreferencesProtocol
                 instance.inMemoryDataStore[storageKeyPath] = encoded
                 instance.preferencesChangedSubject.send(wrappedKeyPath)
             } catch {
-                print(error)
+                instance.handle(error: error)
             }
         }
     }
