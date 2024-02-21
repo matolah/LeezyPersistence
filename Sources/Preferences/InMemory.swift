@@ -3,7 +3,7 @@
 import Foundation
 
 @propertyWrapper
-public struct InMemory<Value: PersistenceValue, Preferences: PreferencesProtocol> {
+public struct InMemory<Value: PersistenceValue, Preferences: BasePreferences> {
     let defaultValue: Value?
 
     public var wrappedValue: Value? {

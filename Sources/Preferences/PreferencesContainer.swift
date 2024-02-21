@@ -2,18 +2,18 @@
 
 import Foundation
 
-public final class PreferencesContainer {
-    public static let shared = PreferencesContainer()
+final class PreferencesContainer {
+    static let shared = PreferencesContainer()
 
-    private var services = [String: PreferencesProtocol]()
+    private var services = [String: BasePreferences]()
 
     private init() {}
 
-    public func register(service: PreferencesProtocol, forIdentifier identifier: String) {
+    func register(service: BasePreferences, forIdentifier identifier: String) {
         services[identifier] = service
     }
 
-    public func resolve(forIdentifier identifier: String) -> PreferencesProtocol? {
+    func resolve(forIdentifier identifier: String) -> BasePreferences? {
         return services[identifier]
     }
 }

@@ -3,7 +3,7 @@
 import Foundation
 
 @propertyWrapper
-public struct UserDefault<Value: PersistenceValue, Preferences: PreferencesProtocol> {
+public struct UserDefault<Value: PersistenceValue, Preferences: BasePreferences> {
     let key: String
     let defaultValue: Value?
 
