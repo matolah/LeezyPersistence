@@ -11,7 +11,3 @@ public protocol PreferencesProtocol: AnyObject {
     var preferencesChangedSubject: PassthroughSubject<AnyKeyPath, Never> { get }
     func handle(error: Error)
 }
-
-public extension PreferencesProtocol {
-    func handle(error: Error) {}
-}
