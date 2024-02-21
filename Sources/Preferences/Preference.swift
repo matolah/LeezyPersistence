@@ -28,11 +28,14 @@ public struct Preference<Value: PersistenceValue, Preferences: PreferencesProtoc
             }
         )
     }
-
+    
     public init(
         _ keyPath: ReferenceWritableKeyPath<Preferences, Value?>,
-        preferences: Preferences
+        preferences: String
     ) {
+        guard let preferences = PreferencesContainer.shared.resolve(forIdentifier: preferences) as? Preferences else {
+            fatalError(PreferencesError.preferencesNotRegistered.localizedDescription)
+        }
         self.keyPath = keyPath
         self.preferences = preferences
     }
