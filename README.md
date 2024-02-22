@@ -10,7 +10,7 @@
   </p>
 </div>
 
-Elevate your Swift data management with an effortless UserDefaults, Keychain, and in-memory storage solution.
+Elevate your `Swift` data management with an effortless `UserDefaults`, `Keychain`, and in-memory storage solution.
 - [About](#about)
 - [Installation](#installation)
 - [Usage](#usage)
@@ -19,7 +19,9 @@ Elevate your Swift data management with an effortless UserDefaults, Keychain, an
 
 ## About
 
-`LeezyPersistence` streamlines Swift data persistence, blending UserDefaults, Keychain, and in-memory solutions into a cohesive, type-safe package. Designed to maximize developer convenience and code clarity, it introduces intuitive property wrappers that abstract complex storage operations. Whether securing sensitive information in the Keychain, storing user preferences, or caching data in memory, LeezyPersistence enhances your application's storage capabilities with minimal setup and maximum efficiency.
+This package streamlines Swift data persistence, blending `UserDefaults`, `Keychain`, and in-memory solutions into a cohesive, type-safe package. 
+
+Designed to maximize developer convenience and code clarity, it introduces intuitive property wrappers that abstract complex storage operations. Whether securing sensitive information in the `Keychain`, storing user preferences, or caching data in memory, `LeezyPersistence` enhances your application's storage capabilities with minimal setup and maximum efficiency.
 
 
 ## Installation
