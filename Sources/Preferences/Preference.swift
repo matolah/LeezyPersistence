@@ -6,8 +6,15 @@ import SwiftUI
 @propertyWrapper
 public struct Preference<Value: PersistenceValue, Preferences: BasePreferences>: DynamicProperty {
     private let keyPath: ReferenceWritableKeyPath<Preferences, Value?>
-    private let preferences: Preferences
+    private let preferencesIdentifier: String
     private var cancellables = Set<AnyCancellable>()
+
+    private var preferences: Preferences {
+        guard let preferences = PreferencesContainer.shared.resolve(forIdentifier: preferencesIdentifier) as? Preferences else {
+            fatalError(PreferencesError.preferencesNotRegistered.localizedDescription)
+        }
+        return preferences
+    }
 
     public var wrappedValue: Value? {
         get {
@@ -33,11 +40,8 @@ public struct Preference<Value: PersistenceValue, Preferences: BasePreferences>:
         _ keyPath: ReferenceWritableKeyPath<Preferences, Value?>,
         preferences: String
     ) {
-        guard let preferences = PreferencesContainer.shared.resolve(forIdentifier: preferences) as? Preferences else {
-            fatalError(PreferencesError.preferencesNotRegistered.localizedDescription)
-        }
         self.keyPath = keyPath
-        self.preferences = preferences
+        self.preferencesIdentifier = preferences
     }
 
     public func addSubscriber(onReceiveValue: @escaping (Value?) -> Void) -> AnyCancellable {

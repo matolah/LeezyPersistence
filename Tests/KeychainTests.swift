@@ -18,11 +18,8 @@ class KeychainTests: XCTestCase {
         }
     }
 
-    fileprivate class Container {
-        @Preference(\KeychainMockPreferences.testKey, preferences: "MockPreferences") var testKey
-    }
+    @Preference(\KeychainMockPreferences.testKey, preferences: "MockPreferences") var testKey
 
-    private var container: Container!
     private var mockPreferences: KeychainMockPreferences!
     private var keychainManager: MockKeychainManager!
     private var cancellable: AnyCancellable?
@@ -31,21 +28,19 @@ class KeychainTests: XCTestCase {
         super.setUp()
         keychainManager = MockKeychainManager()
         mockPreferences = KeychainMockPreferences(keychainManager: keychainManager)
-        container = Container()
     }
 
     override func tearDown() {
         keychainManager = nil
         cancellable = nil
         mockPreferences = nil
-        container = nil
         super.tearDown()
     }
 
     func testKeychainSaveAndLoad() throws {
         let testValue = "TestValue"
 
-        container.testKey = testValue
+        testKey = testValue
         XCTAssertEqual(testKeyKeychainValue(), testValue)
     }
 
@@ -63,7 +58,7 @@ class KeychainTests: XCTestCase {
                 XCTAssertTrue(changedKeyPath == keyPath)
             }
 
-        container.testKey = testValue
+        testKey = testValue
     }
 }
 

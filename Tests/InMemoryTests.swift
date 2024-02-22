@@ -10,31 +10,26 @@ class InMemoryTests: XCTestCase {
         @InMemory<String, InMemoryMockPreferences> var testKey: String?
     }
 
-    fileprivate class Container {
-        @Preference(\InMemoryMockPreferences.testKey, preferences: "MockPreferences") var testKey
-    }
-
-    private var container: Container!
     private var mockPreferences: InMemoryMockPreferences!
     private var cancellable: AnyCancellable?
+
+    @Preference(\InMemoryMockPreferences.testKey, preferences: "MockPreferences") var testKey
 
     override func setUp() {
         super.setUp()
         mockPreferences = InMemoryMockPreferences()
-        container = Container()
     }
 
     override func tearDown() {
         cancellable = nil
         mockPreferences = nil
-        container = nil
         super.tearDown()
     }
 
     func testInMemorySaveAndLoad() throws {
         let testValue = "TestValue"
 
-        container.testKey = testValue
+        testKey = testValue
         XCTAssertEqual(testKeyInMemoryValue(), testValue)
     }
 
@@ -52,7 +47,7 @@ class InMemoryTests: XCTestCase {
                 XCTAssertTrue(changedKeyPath == keyPath)
             }
 
-        container.testKey = testValue
+        testKey = testValue
     }
 }
 

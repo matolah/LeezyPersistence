@@ -18,11 +18,8 @@ class UserDefaultTests: XCTestCase {
         }
     }
 
-    fileprivate class Container {
-        @Preference(\UserDefaultsMockPreferences.testKey, preferences: "MockPreferences") var testKey
-    }
+    @Preference(\UserDefaultsMockPreferences.testKey, preferences: "MockPreferences") var testKey
 
-    private var container: Container!
     private var mockPreferences: UserDefaultsMockPreferences!
     private var userDefaults: UserDefaults!
     private var cancellable: AnyCancellable?
@@ -31,7 +28,6 @@ class UserDefaultTests: XCTestCase {
         super.setUp()
         userDefaults = UserDefaults(suiteName: #file)!
         mockPreferences = UserDefaultsMockPreferences(userDefaults: userDefaults)
-        container = Container()
     }
 
     override func tearDown() {
@@ -39,14 +35,13 @@ class UserDefaultTests: XCTestCase {
         userDefaults = nil
         cancellable = nil
         mockPreferences = nil
-        container = nil
         super.tearDown()
     }
 
     func testUserDefaultSaveAndLoad() throws {
         let testValue = "TestValue"
 
-        container.testKey = testValue
+        testKey = testValue
         XCTAssertEqual(testKeyUserDefaultsValue(), testValue)
     }
 
@@ -64,7 +59,7 @@ class UserDefaultTests: XCTestCase {
                 XCTAssertTrue(changedKeyPath == keyPath)
             }
 
-        container.testKey = testValue
+        testKey = testValue
     }
 }
 
