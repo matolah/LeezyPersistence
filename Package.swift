@@ -10,6 +10,14 @@ let package = Package(
         .library(name: "LeezyPersistence", targets: ["LeezyPersistence"]),
     ],
     targets: [
-        .target(name: "LeezyPersistence", path: "Sources"),
+        .target(
+            name: "LeezyPersistence",
+            path: "Sources"
+        ),
+        .testTarget(
+            name: "LeezyPersistenceTests",
+            dependencies: ["LeezyPersistence"],
+            path: "Tests"
+        ),
     ]
 )
