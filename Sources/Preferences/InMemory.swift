@@ -2,8 +2,12 @@
 
 import Foundation
 
+public protocol InMemoryPreferences: PreferencesProtocol {
+    var inMemoryDataStore: [AnyKeyPath: Data] { get set }
+}
+
 @propertyWrapper
-public struct InMemory<Value: PersistenceValue, Preferences: BasePreferences> {
+public struct InMemory<Value: PersistenceValue, Preferences: InMemoryPreferences> {
     let defaultValue: Value?
 
     public var wrappedValue: Value? {

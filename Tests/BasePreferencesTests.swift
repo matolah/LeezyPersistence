@@ -10,11 +10,7 @@ class BasePreferencesTests: XCTestCase {
 
     override func setUp() {
         super.setUp()
-        basePreferences = BasePreferences(
-            identifier: "BasePreferences",
-            keychainManager: MockKeychainManager(),
-            userDefaults: UserDefaults.standard
-        )
+        basePreferences = BasePreferences(identifier: "BasePreferences")
     }
 
     override func tearDown() {

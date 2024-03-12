@@ -9,7 +9,7 @@ class UserDefaultTests: XCTestCase {
     fileprivate class UserDefaultsMockPreferences: MockPreferences {
         @UserDefault<String, UserDefaultsMockPreferences>("testKey") var testKey: String?
 
-        required init(
+        override init(
             identifier: String = "MockPreferences",
             keychainManager: KeychainManagerProtocol = MockKeychainManager(),
             userDefaults: UserDefaults

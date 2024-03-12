@@ -2,8 +2,12 @@
 
 import Foundation
 
+public protocol KeychainPreferences: PreferencesProtocol {
+    var keychainManager: KeychainManagerProtocol { get }
+}
+
 @propertyWrapper
-public struct Keychain<Value: PersistenceValue, Preferences: BasePreferences> {
+public struct Keychain<Value: PersistenceValue, Preferences: KeychainPreferences> {
     let key: String
     let defaultValue: Value?
 
