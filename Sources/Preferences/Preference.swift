@@ -4,7 +4,7 @@ import Combine
 import SwiftUI
 
 @propertyWrapper
-public struct Preference<Value: PersistenceValue, Preferences: BasePreferences>: DynamicProperty {
+public struct Preference<Value: PersistenceValue, Preferences: PreferencesProtocol>: DynamicProperty {
     private let keyPath: ReferenceWritableKeyPath<Preferences, Value?>
     private let preferencesIdentifier: String
     private var cancellables = Set<AnyCancellable>()

@@ -2,8 +2,12 @@
 
 import Foundation
 
+public protocol UserDefaultPreferences: PreferencesProtocol {
+    var userDefaults: UserDefaults { get }
+}
+
 @propertyWrapper
-public struct UserDefault<Value: PersistenceValue, Preferences: BasePreferences> {
+public struct UserDefault<Value: PersistenceValue, Preferences: UserDefaultPreferences> {
     let key: String
     let defaultValue: Value?
 

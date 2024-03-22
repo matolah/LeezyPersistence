@@ -4,8 +4,8 @@ import Foundation
 
 @testable import LeezyPersistence
 
-class MockPreferences: BasePreferences {
-    required init(
+class MockPreferences: MultiStoragePreferences {
+    override init(
         identifier: String = "MockPreferences",
         keychainManager: KeychainManagerProtocol = MockKeychainManager(),
         userDefaults: UserDefaults = UserDefaults.standard
