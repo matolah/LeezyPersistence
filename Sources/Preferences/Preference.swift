@@ -50,8 +50,8 @@ public struct Preference<Value: PersistenceValue, Preferences: BasePreferences>:
             .filter { changedKeyPath in
                 return changedKeyPath == keyPath
             }
-            .sink { [onReceiveValue, wrappedValue] _ in
-                onReceiveValue(wrappedValue)
+            .sink { [onReceiveValue] _ in
+                onReceiveValue(self.wrappedValue)
             }
     }
 

@@ -10,18 +10,23 @@ class InMemoryTests: XCTestCase {
         @InMemory<String, InMemoryMockPreferences> var testKey: String?
     }
 
+    fileprivate class MockViewModel {
+        @Preference(\InMemoryMockPreferences.testKey, preferences: "MockPreferences") var testKey
+    }
+
     private var mockPreferences: InMemoryMockPreferences!
-    private var cancellable: AnyCancellable?
+    private var cancellables: Set<AnyCancellable>!
 
     @Preference(\InMemoryMockPreferences.testKey, preferences: "MockPreferences") var testKey
 
     override func setUp() {
         super.setUp()
         mockPreferences = InMemoryMockPreferences()
+        cancellables = Set<AnyCancellable>()
     }
 
     override func tearDown() {
-        cancellable = nil
+        cancellables = nil
         mockPreferences = nil
         super.tearDown()
     }
@@ -42,12 +47,24 @@ class InMemoryTests: XCTestCase {
         let testValue = "TestValue"
 
         let keyPath: ReferenceWritableKeyPath<InMemoryMockPreferences, String?> = \.testKey
-        cancellable = mockPreferences.preferencesChangedSubject
+        mockPreferences.preferencesChangedSubject
             .sink { changedKeyPath in
                 XCTAssertTrue(changedKeyPath == keyPath)
             }
+            .store(in: &cancellables)
 
         testKey = testValue
     }
-}
 
+    func testPreferencesChangedSubjectValue() throws {
+        let mockViewModel = MockViewModel()
+        let expectation = XCTestExpectation(description: #function)
+        _testKey.subscribe(storingTo: &cancellables) { value in
+            XCTAssertEqual(value, "Mock123")
+            expectation.fulfill()
+        }
+        testKey = "Mock123"
+        XCTAssertEqual(mockViewModel.testKey, "Mock123")
+        wait(for: [expectation])
+    }
+}

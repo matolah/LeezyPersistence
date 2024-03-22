@@ -18,22 +18,27 @@ class UserDefaultTests: XCTestCase {
         }
     }
 
+    fileprivate class MockViewModel {
+        @Preference(\UserDefaultsMockPreferences.testKey, preferences: "MockPreferences") var testKey
+    }
+
     @Preference(\UserDefaultsMockPreferences.testKey, preferences: "MockPreferences") var testKey
 
     private var mockPreferences: UserDefaultsMockPreferences!
     private var userDefaults: UserDefaults!
-    private var cancellable: AnyCancellable?
+    private var cancellables: Set<AnyCancellable>!
 
     override func setUp() {
         super.setUp()
         userDefaults = UserDefaults(suiteName: #file)!
         mockPreferences = UserDefaultsMockPreferences(userDefaults: userDefaults)
+        cancellables = Set<AnyCancellable>()
     }
 
     override func tearDown() {
         userDefaults.removePersistentDomain(forName: #file)
         userDefaults = nil
-        cancellable = nil
+        cancellables = nil
         mockPreferences = nil
         super.tearDown()
     }
@@ -54,12 +59,24 @@ class UserDefaultTests: XCTestCase {
         let testValue = "TestValue"
 
         let keyPath: ReferenceWritableKeyPath<UserDefaultsMockPreferences, String?> = \.testKey
-        cancellable = mockPreferences.preferencesChangedSubject
+        mockPreferences.preferencesChangedSubject
             .sink { changedKeyPath in
                 XCTAssertTrue(changedKeyPath == keyPath)
             }
+            .store(in: &cancellables)
 
         testKey = testValue
     }
-}
 
+    func testPreferencesChangedSubjectValue() throws {
+        let mockViewModel = MockViewModel()
+        let expectation = XCTestExpectation(description: #function)
+        _testKey.subscribe(storingTo: &cancellables) { value in
+            XCTAssertEqual(value, "Mock123")
+            expectation.fulfill()
+        }
+        testKey = "Mock123"
+        XCTAssertEqual(mockViewModel.testKey, "Mock123")
+        wait(for: [expectation])
+    }
+}
