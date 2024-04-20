@@ -35,7 +35,7 @@ public struct Preference<Value: PersistenceValue, Preferences: PreferencesProtoc
             }
         )
     }
-    
+
     public init(
         _ keyPath: ReferenceWritableKeyPath<Preferences, Value?>,
         preferences: String
@@ -45,14 +45,21 @@ public struct Preference<Value: PersistenceValue, Preferences: PreferencesProtoc
     }
 
     public func addSubscriber(onReceiveValue: @escaping (Value?) -> Void) -> AnyCancellable {
-        return preferences
+        return publisher().sink { [onReceiveValue] _ in
+            onReceiveValue(self.wrappedValue)
+        }
+    }
+
+    public func publisher() -> AnyPublisher<Value?, Never> {
+        preferences
             .preferencesChangedSubject
             .filter { changedKeyPath in
                 return changedKeyPath == keyPath
             }
-            .sink { [onReceiveValue] _ in
-                onReceiveValue(self.wrappedValue)
+            .map { _ in
+                self.wrappedValue
             }
+            .eraseToAnyPublisher()
     }
 
     public func subscribe(storingTo cancellables: inout Set<AnyCancellable>, onReceiveValue: @escaping (Value?) -> Void) {
