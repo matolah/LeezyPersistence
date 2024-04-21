@@ -5,6 +5,7 @@ import SwiftUI
 
 @propertyWrapper
 public struct Preference<Value: PersistenceValue, Preferences: PreferencesProtocol>: DynamicProperty {
+    private let actor: PreferenceActor<Value, Preferences>
     private let keyPath: ReferenceWritableKeyPath<Preferences, Value?>
     private let preferencesIdentifier: String
     private var cancellables = Set<AnyCancellable>()
@@ -14,6 +15,12 @@ public struct Preference<Value: PersistenceValue, Preferences: PreferencesProtoc
             fatalError(PreferencesError.preferencesNotRegistered.localizedDescription)
         }
         return preferences
+    }
+
+    public var atomicValue: Value? {
+        get async {
+            await actor.value
+        }
     }
 
     public var wrappedValue: Value? {
@@ -40,6 +47,7 @@ public struct Preference<Value: PersistenceValue, Preferences: PreferencesProtoc
         _ keyPath: ReferenceWritableKeyPath<Preferences, Value?>,
         preferences: String
     ) {
+        self.actor = PreferenceActor(keyPath, preferences: preferences)
         self.keyPath = keyPath
         self.preferencesIdentifier = preferences
     }
@@ -66,6 +74,10 @@ public struct Preference<Value: PersistenceValue, Preferences: PreferencesProtoc
         cancellables.insert(
             addSubscriber(onReceiveValue: onReceiveValue)
         )
+    }
+
+    public func atomicUpdate(to newValue: Value?) async {
+        await actor.update(to: newValue)
     }
 }
 
