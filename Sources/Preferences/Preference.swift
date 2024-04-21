@@ -5,6 +5,7 @@ import SwiftUI
 
 @propertyWrapper
 public struct Preference<Value: PersistenceValue, Preferences: PreferencesProtocol>: DynamicProperty {
+    private let actor: PreferenceActor<Value, Preferences>
     private let keyPath: ReferenceWritableKeyPath<Preferences, Value?>
     private let preferencesIdentifier: String
     private var cancellables = Set<AnyCancellable>()
@@ -14,6 +15,12 @@ public struct Preference<Value: PersistenceValue, Preferences: PreferencesProtoc
             fatalError(PreferencesError.preferencesNotRegistered.localizedDescription)
         }
         return preferences
+    }
+
+    public var atomicValue: Value? {
+        get async {
+            await actor.value
+        }
     }
 
     public var wrappedValue: Value? {
@@ -35,30 +42,42 @@ public struct Preference<Value: PersistenceValue, Preferences: PreferencesProtoc
             }
         )
     }
-    
+
     public init(
         _ keyPath: ReferenceWritableKeyPath<Preferences, Value?>,
         preferences: String
     ) {
+        self.actor = PreferenceActor(keyPath, preferences: preferences)
         self.keyPath = keyPath
         self.preferencesIdentifier = preferences
     }
 
     public func addSubscriber(onReceiveValue: @escaping (Value?) -> Void) -> AnyCancellable {
-        return preferences
+        return publisher().sink { [onReceiveValue] _ in
+            onReceiveValue(self.wrappedValue)
+        }
+    }
+
+    public func publisher() -> AnyPublisher<Value?, Never> {
+        preferences
             .preferencesChangedSubject
             .filter { changedKeyPath in
                 return changedKeyPath == keyPath
             }
-            .sink { [onReceiveValue] _ in
-                onReceiveValue(self.wrappedValue)
+            .map { _ in
+                self.wrappedValue
             }
+            .eraseToAnyPublisher()
     }
 
     public func subscribe(storingTo cancellables: inout Set<AnyCancellable>, onReceiveValue: @escaping (Value?) -> Void) {
         cancellables.insert(
             addSubscriber(onReceiveValue: onReceiveValue)
         )
+    }
+
+    public func atomicUpdate(to newValue: Value?) async {
+        await actor.update(to: newValue)
     }
 }
 
