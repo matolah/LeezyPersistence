@@ -2,7 +2,8 @@ import Foundation
 
 @testable import LeezyPersistence
 
-class MockPreferences: BasePreferences, InMemoryPreferences, KeychainPreferences, UserDefaultPreferences {
+class MockPreferences: BasePreferences, FilePreferences, InMemoryPreferences, KeychainPreferences, UserDefaultPreferences {
+    var fileDataStore = FileDataStore()
     var inMemoryDataStore = InMemoryDataStore()
     let keychainManager: KeychainManagerProtocol
     let userDefaults: UserDefaults
