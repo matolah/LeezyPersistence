@@ -4,11 +4,15 @@ import XCTest
 @testable import LeezyPersistence
 
 class InMemoryTests: XCTestCase {
-    fileprivate class InMemoryMockPreferences: MockPreferences {
+    private class InMemoryMockPreferences: MockPreferences {
         @InMemory<String, InMemoryMockPreferences> var testKey: String?
+
+        var testKeyStorageKeyPath: ReferenceWritableKeyPath<InMemoryMockPreferences, InMemory<String, InMemoryMockPreferences>> {
+            \InMemoryMockPreferences._testKey
+        }
     }
 
-    fileprivate class MockViewModel {
+    private class MockViewModel {
         @Preference(\InMemoryMockPreferences.testKey, preferences: "MockPreferences") var testKey
     }
 
@@ -37,7 +41,7 @@ class InMemoryTests: XCTestCase {
     }
 
     private func testKeyInMemoryValue() -> String? {
-        let data = mockPreferences.inMemoryDataStore.first!.value
+        let data = mockPreferences.inMemoryDataStore[mockPreferences.testKeyStorageKeyPath]!
         return try? JSONDecoder().decode(String.self, from: data)
     }
 

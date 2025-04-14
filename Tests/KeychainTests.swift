@@ -4,7 +4,7 @@ import XCTest
 @testable import LeezyPersistence
 
 class KeychainTests: XCTestCase {
-    fileprivate class KeychainMockPreferences: MockPreferences {
+    private class KeychainMockPreferences: MockPreferences {
         @Keychain<String, KeychainMockPreferences>("testKey") var testKey: String?
 
         override init(
@@ -16,7 +16,7 @@ class KeychainTests: XCTestCase {
         }
     }
 
-    fileprivate class MockViewModel {
+    private class MockViewModel {
         @Preference(\KeychainMockPreferences.testKey, preferences: "MockPreferences") var testKey
     }
 

@@ -3,7 +3,7 @@ import Foundation
 @testable import LeezyPersistence
 
 class MockPreferences: BasePreferences, InMemoryPreferences, KeychainPreferences, UserDefaultPreferences {
-    var inMemoryDataStore = [AnyKeyPath: Data]()
+    var inMemoryDataStore = InMemoryDataStore()
     let keychainManager: KeychainManagerProtocol
     let userDefaults: UserDefaults
 
