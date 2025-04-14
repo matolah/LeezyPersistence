@@ -104,7 +104,7 @@ final class ContentViewModel: ObservableObject {
 }
 ```
 
-Create as many `Preferences` classes with context-specific preferences as you'd like:
+4. Create as many `Preferences` classes with context-specific preferences as you'd like:
 
 ```swift
 final class SharedPreferences: BasePreferences {
