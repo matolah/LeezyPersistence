@@ -7,10 +7,11 @@ public struct Keychain<Value: PersistenceValue, Preferences: KeychainPreferences
 
     public var wrappedValue: Value? {
         get {
-            fatalError("Wrapped value should not be used")
+            PropertyWrapperFailures.wrappedValueAssertionFailure()
+            return nil
         }
         set {
-            fatalError("Wrapped value should not be used")
+            PropertyWrapperFailures.wrappedValueAssertionFailure()
         }
     }
 
@@ -33,7 +34,7 @@ public struct Keychain<Value: PersistenceValue, Preferences: KeychainPreferences
             }
 
             do {
-                let encoded = try JSONEncoder().encode(newValue)
+                let encoded = try PersistenceCoder.encode(newValue)
                 let key = instance[keyPath: storageKeyPath].key
                 try instance.keychainManager.save(encoded, forKey: key)
                 instance.preferencesChangedSubject.send(wrappedKeyPath)
@@ -53,7 +54,7 @@ public struct Keychain<Value: PersistenceValue, Preferences: KeychainPreferences
             guard let data = try instance.keychainManager.load(key) else {
                 return defaultValue
             }
-            return try? JSONDecoder().decode(Value.self, from: data)
+            return try? PersistenceCoder.decode(Value.self, from: data)
         } catch {
             instance.handle(error: error)
             return defaultValue

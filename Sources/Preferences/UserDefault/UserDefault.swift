@@ -7,10 +7,11 @@ public struct UserDefault<Value: PersistenceValue, Preferences: UserDefaultPrefe
 
     public var wrappedValue: Value? {
         get {
-            fatalError("Wrapped value should not be used")
+            PropertyWrapperFailures.wrappedValueAssertionFailure()
+            return nil
         }
         set {
-            fatalError("Wrapped value should not be used")
+            PropertyWrapperFailures.wrappedValueAssertionFailure()
         }
     }
 
@@ -33,7 +34,7 @@ public struct UserDefault<Value: PersistenceValue, Preferences: UserDefaultPrefe
             }
 
             do {
-                let encoded = try JSONEncoder().encode(newValue)
+                let encoded = try PersistenceCoder.encode(newValue)
                 let container = instance.userDefaults
                 let key = instance[keyPath: storageKeyPath].key
                 container.set(encoded, forKey: key)
@@ -56,6 +57,6 @@ public struct UserDefault<Value: PersistenceValue, Preferences: UserDefaultPrefe
             return defaultValue
         }
 
-        return try? JSONDecoder().decode(Value.self, from: data)
+        return try? PersistenceCoder.decode(Value.self, from: data)
     }
 }

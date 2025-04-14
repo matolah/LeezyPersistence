@@ -6,10 +6,11 @@ public struct InMemory<Value: PersistenceValue, Preferences: InMemoryPreferences
 
     public var wrappedValue: Value? {
         get {
-            fatalError("Wrapped value should not be used")
+            PropertyWrapperFailures.wrappedValueAssertionFailure()
+            return nil
         }
         set {
-            fatalError("Wrapped value should not be used")
+            PropertyWrapperFailures.wrappedValueAssertionFailure()
         }
     }
 
@@ -31,7 +32,7 @@ public struct InMemory<Value: PersistenceValue, Preferences: InMemoryPreferences
             }
 
             do {
-                let encoded = try JSONEncoder().encode(newValue)
+                let encoded = try PersistenceCoder.encode(newValue)
                 instance.inMemoryDataStore[storageKeyPath] = encoded
                 instance.preferencesChangedSubject.send(wrappedKeyPath)
             } catch {
@@ -50,6 +51,6 @@ public struct InMemory<Value: PersistenceValue, Preferences: InMemoryPreferences
             return defaultValue
         }
 
-        return try? JSONDecoder().decode(Value.self, from: data)
+        return try? PersistenceCoder.decode(Value.self, from: data)
     }
 }
