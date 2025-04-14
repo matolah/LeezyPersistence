@@ -16,7 +16,7 @@ public struct UserDefault<Value: PersistenceValue, Preferences: UserDefaultPrefe
     }
 
     public init(wrappedValue: Value? = nil, _ key: String) {
-        self.defaultValue = wrappedValue
+        defaultValue = wrappedValue
         self.key = key
     }
 
@@ -26,7 +26,7 @@ public struct UserDefault<Value: PersistenceValue, Preferences: UserDefaultPrefe
         storage storageKeyPath: ReferenceWritableKeyPath<Preferences, Self>
     ) -> Value? {
         get {
-            return value(_enclosingInstance: instance, storage: storageKeyPath)
+            value(_enclosingInstance: instance, storage: storageKeyPath)
         }
         set {
             guard value(_enclosingInstance: instance, storage: storageKeyPath) != newValue else {

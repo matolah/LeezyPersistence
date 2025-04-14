@@ -15,7 +15,7 @@ public struct InMemory<Value: PersistenceValue, Preferences: InMemoryPreferences
     }
 
     public init(wrappedValue: Value? = nil) {
-        self.defaultValue = wrappedValue
+        defaultValue = wrappedValue
     }
 
     public static subscript(
@@ -24,7 +24,7 @@ public struct InMemory<Value: PersistenceValue, Preferences: InMemoryPreferences
         storage storageKeyPath: ReferenceWritableKeyPath<Preferences, Self>
     ) -> Value? {
         get {
-            return value(_enclosingInstance: instance, storage: storageKeyPath)
+            value(_enclosingInstance: instance, storage: storageKeyPath)
         }
         set {
             guard value(_enclosingInstance: instance, storage: storageKeyPath) != newValue else {

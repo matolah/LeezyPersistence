@@ -1,5 +1,5 @@
-import XCTest
 import Combine
+import XCTest
 
 @testable import LeezyPersistence
 

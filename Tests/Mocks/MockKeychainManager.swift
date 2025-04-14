@@ -8,7 +8,7 @@ class MockKeychainManager: KeychainManagerProtocol {
     func load(_ key: String, ofKind kind: KeychainAccessKind) throws -> Data? {
         values[key]
     }
-    
+
     func save(_ value: Data, forKey key: String, ofKind kind: KeychainAccessKind) throws {
         values[key] = value
     }

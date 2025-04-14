@@ -7,7 +7,7 @@ let package = Package(
     name: "LeezyPersistence",
     platforms: [.iOS(.v13)],
     products: [
-        .library(name: "LeezyPersistence", targets: ["LeezyPersistence"]),
+        .library(name: "LeezyPersistence", targets: ["LeezyPersistence"])
     ],
     targets: [
         .target(
@@ -18,6 +18,6 @@ let package = Package(
             name: "LeezyPersistenceTests",
             dependencies: ["LeezyPersistence"],
             path: "Tests"
-        ),
+        )
     ]
 )

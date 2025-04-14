@@ -38,12 +38,12 @@ public struct Preference<Value: PersistenceValue, Preferences: PreferencesProtoc
         preferences: String
     ) {
         self.keyPath = keyPath
-        self.preferencesIdentifier = preferences
+        preferencesIdentifier = preferences
     }
 
     public func addSubscriber(onReceiveValue: @escaping (Value?) -> Void) -> AnyCancellable {
-        return publisher().sink { [onReceiveValue] _ in
-            onReceiveValue(self.wrappedValue)
+        publisher().sink { [onReceiveValue] _ in
+            onReceiveValue(wrappedValue)
         }
     }
 
@@ -51,10 +51,10 @@ public struct Preference<Value: PersistenceValue, Preferences: PreferencesProtoc
         preferences
             .preferencesChangedSubject
             .filter { changedKeyPath in
-                return changedKeyPath == keyPath
+                changedKeyPath == keyPath
             }
             .map { _ in
-                self.wrappedValue
+                wrappedValue
             }
             .eraseToAnyPublisher()
     }

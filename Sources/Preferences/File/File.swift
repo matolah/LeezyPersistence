@@ -16,7 +16,7 @@ public struct File<Value: PersistenceValue, Preferences: FilePreferences> {
     }
 
     public init(wrappedValue: Value? = nil, _ key: String) {
-        self.defaultValue = wrappedValue
+        defaultValue = wrappedValue
         self.key = key
     }
 
@@ -26,7 +26,7 @@ public struct File<Value: PersistenceValue, Preferences: FilePreferences> {
         storage storageKeyPath: ReferenceWritableKeyPath<Preferences, Self>
     ) -> Value? {
         get {
-            return value(_enclosingInstance: instance, storage: storageKeyPath)
+            value(_enclosingInstance: instance, storage: storageKeyPath)
         }
         set {
             guard value(_enclosingInstance: instance, storage: storageKeyPath) != newValue else {
@@ -54,7 +54,7 @@ public struct File<Value: PersistenceValue, Preferences: FilePreferences> {
         guard let data = instance.fileDataStore[value.key] else {
             return defaultValue
         }
-        
+
         return try? PersistenceCoder.decode(Value.self, from: data)
     }
 }

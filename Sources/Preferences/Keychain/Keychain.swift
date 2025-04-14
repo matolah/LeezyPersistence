@@ -17,7 +17,7 @@ public struct Keychain<Value: PersistenceValue, Preferences: KeychainPreferences
     }
 
     public init(wrappedValue: Value? = nil, kind: KeychainAccessKind = .standard, _ key: String) {
-        self.defaultValue = wrappedValue
+        defaultValue = wrappedValue
         self.kind = kind
         self.key = key
     }
@@ -28,7 +28,7 @@ public struct Keychain<Value: PersistenceValue, Preferences: KeychainPreferences
         storage storageKeyPath: ReferenceWritableKeyPath<Preferences, Self>
     ) -> Value? {
         get {
-            return value(_enclosingInstance: instance, storage: storageKeyPath)
+            value(_enclosingInstance: instance, storage: storageKeyPath)
         }
         set {
             guard value(_enclosingInstance: instance, storage: storageKeyPath) != newValue else {

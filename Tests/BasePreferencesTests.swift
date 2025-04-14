@@ -20,4 +20,3 @@ class BasePreferencesTests: XCTestCase {
         XCTAssertTrue(PreferencesContainer.shared.resolve(forIdentifier: "BasePreferences") === basePreferences)
     }
 }
-

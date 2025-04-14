@@ -1,7 +1,7 @@
 import Foundation
 
 enum PersistenceCoder {
-    static func encode<T: Codable>(_ value: T?) throws -> Data {
+    static func encode(_ value: (some Codable)?) throws -> Data {
         try JSONEncoder().encode(value)
     }
 

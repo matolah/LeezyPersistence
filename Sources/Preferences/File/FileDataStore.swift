@@ -6,7 +6,7 @@ public final class FileDataStore {
 
     public init(directory: FileManager.SearchPathDirectory = .applicationSupportDirectory, subfolder: String = "LeezyPersistence") {
         let url = FileManager.default.urls(for: directory, in: .userDomainMask).first!
-        self.baseURL = url.appendingPathComponent(subfolder)
+        baseURL = url.appendingPathComponent(subfolder)
 
         try? FileManager.default.createDirectory(at: baseURL, withIntermediateDirectories: true)
     }
@@ -21,7 +21,7 @@ public final class FileDataStore {
         set {
             queue.async(flags: .barrier) {
                 let fileURL = self.fileURL(for: key)
-                if let newValue = newValue {
+                if let newValue {
                     try? newValue.write(to: fileURL, options: .atomic)
                 } else {
                     try? FileManager.default.removeItem(at: fileURL)
