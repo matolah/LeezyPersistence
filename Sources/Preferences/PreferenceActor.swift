@@ -1,5 +1,3 @@
-// Created by Mateus Lino
-
 import Foundation
 
 actor PreferenceActor<Value: PersistenceValue, Preferences: PreferencesProtocol> {

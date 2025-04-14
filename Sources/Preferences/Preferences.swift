@@ -1,5 +1,3 @@
-// Created by Mateus Lino
-
 import Combine
 import Foundation
 

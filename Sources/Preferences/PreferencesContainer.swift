@@ -1,5 +1,3 @@
-// Created by Mateus Lino
-
 import Foundation
 
 final class PreferencesContainer {

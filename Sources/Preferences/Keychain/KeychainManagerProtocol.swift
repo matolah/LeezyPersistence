@@ -1,5 +1,3 @@
-// Created by Mateus Lino
-
 import Foundation
 
 public protocol KeychainManagerProtocol {
