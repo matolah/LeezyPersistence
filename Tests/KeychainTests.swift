@@ -48,8 +48,15 @@ class KeychainTests: XCTestCase {
     }
 
     private func testKeyKeychainValue() -> String? {
-        let data = try! keychainManager.load("testKey")!
+        let data = try! keychainManager.load("testKey", ofKind: .standard)!
         return try? JSONDecoder().decode(String.self, from: data)
+    }
+
+    func testKeychainBiSaveAndLoad() throws {
+        let testValue = "TestValue"
+
+        testKey = testValue
+        XCTAssertEqual(testKeyKeychainValue(), testValue)
     }
 
     func testUserDefaultValueChangedNotification() throws {

@@ -2,6 +2,7 @@ import Foundation
 
 @propertyWrapper
 public struct Keychain<Value: PersistenceValue, Preferences: KeychainPreferences> {
+    let kind: KeychainAccessKind
     let key: String
     let defaultValue: Value?
 
@@ -15,8 +16,9 @@ public struct Keychain<Value: PersistenceValue, Preferences: KeychainPreferences
         }
     }
 
-    public init(wrappedValue: Value? = nil, _ key: String) {
+    public init(wrappedValue: Value? = nil, kind: KeychainAccessKind = .standard, _ key: String) {
         self.defaultValue = wrappedValue
+        self.kind = kind
         self.key = key
     }
 
@@ -35,8 +37,8 @@ public struct Keychain<Value: PersistenceValue, Preferences: KeychainPreferences
 
             do {
                 let encoded = try PersistenceCoder.encode(newValue)
-                let key = instance[keyPath: storageKeyPath].key
-                try instance.keychainManager.save(encoded, forKey: key)
+                let value = instance[keyPath: storageKeyPath]
+                try instance.keychainManager.save(encoded, forKey: value.key, ofKind: value.kind)
                 instance.preferencesChangedSubject.send(wrappedKeyPath)
             } catch {
                 instance.handle(error: error)
@@ -50,8 +52,8 @@ public struct Keychain<Value: PersistenceValue, Preferences: KeychainPreferences
     ) -> Value? {
         let defaultValue = instance[keyPath: storageKeyPath].defaultValue
         do {
-            let key = instance[keyPath: storageKeyPath].key
-            guard let data = try instance.keychainManager.load(key) else {
+            let value = instance[keyPath: storageKeyPath]
+            guard let data = try instance.keychainManager.load(value.key, ofKind: value.kind) else {
                 return defaultValue
             }
             return try? PersistenceCoder.decode(Value.self, from: data)

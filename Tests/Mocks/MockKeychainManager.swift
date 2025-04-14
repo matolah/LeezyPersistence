@@ -5,15 +5,11 @@ import Foundation
 class MockKeychainManager: KeychainManagerProtocol {
     var values = [String: Data]()
 
-    func load(_ key: String) throws -> Data? {
+    func load(_ key: String, ofKind kind: KeychainAccessKind) throws -> Data? {
         values[key]
     }
     
-    func save(_ value: Data, forKey key: String) throws {
+    func save(_ value: Data, forKey key: String, ofKind kind: KeychainAccessKind) throws {
         values[key] = value
-    }
-    
-    func delete(_ key: String) throws {
-        values.removeValue(forKey: key)
     }
 }
