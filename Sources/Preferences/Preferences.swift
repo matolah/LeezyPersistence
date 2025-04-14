@@ -8,7 +8,6 @@ public protocol PreferencesProtocol: AnyObject {
     func handle(error: Error)
 }
 
-// Based on https://www.avanderlee.com/swift/appstorage-explained/
 open class BasePreferences: PreferencesProtocol {
     public private(set) var preferencesChangedSubject = PassthroughSubject<AnyKeyPath, Never>()
 

@@ -23,6 +23,8 @@ This package streamlines Swift data persistence, blending `UserDefaults`, `Keych
 
 Designed to maximize developer convenience and code clarity, it introduces intuitive property wrappers that abstract complex storage operations. Whether securing sensitive information in the `Keychain`, storing user preferences, or caching data in memory, `LeezyPersistence` enhances your application's storage capabilities with minimal setup and maximum efficiency.
 
+The library was based on [this article](https://www.avanderlee.com/swift/appstorage-explained)
+
 
 ## Installation
 
