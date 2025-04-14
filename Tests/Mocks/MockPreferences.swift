@@ -2,12 +2,18 @@ import Foundation
 
 @testable import LeezyPersistence
 
-class MockPreferences: MultiStoragePreferences {
-    override init(
+class MockPreferences: BasePreferences, InMemoryPreferences, KeychainPreferences, UserDefaultPreferences {
+    var inMemoryDataStore = [AnyKeyPath: Data]()
+    let keychainManager: KeychainManagerProtocol
+    let userDefaults: UserDefaults
+
+    init(
         identifier: String = "MockPreferences",
         keychainManager: KeychainManagerProtocol = MockKeychainManager(),
         userDefaults: UserDefaults = UserDefaults.standard
     ) {
-        super.init(identifier: identifier, keychainManager: keychainManager, userDefaults: userDefaults)
+        self.keychainManager = keychainManager
+        self.userDefaults = userDefaults
+        super.init(identifier: identifier)
     }
 }

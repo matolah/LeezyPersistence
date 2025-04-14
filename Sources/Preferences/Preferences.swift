@@ -15,19 +15,3 @@ open class BasePreferences: PreferencesProtocol {
 
     open func handle(error: Error) {}
 }
-
-open class MultiStoragePreferences: BasePreferences, InMemoryPreferences, KeychainPreferences, UserDefaultPreferences {
-    public var inMemoryDataStore = [AnyKeyPath: Data]()
-    public let keychainManager: KeychainManagerProtocol
-    public let userDefaults: UserDefaults
-
-    public init(
-        identifier: String,
-        keychainManager: KeychainManagerProtocol,
-        userDefaults: UserDefaults
-    ) {
-        self.keychainManager = keychainManager
-        self.userDefaults = userDefaults
-        super.init(identifier: identifier)
-    }
-}

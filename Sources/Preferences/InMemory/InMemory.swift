@@ -1,12 +1,7 @@
 import Foundation
 
-public protocol UserDefaultPreferences: PreferencesProtocol {
-    var userDefaults: UserDefaults { get }
-}
-
 @propertyWrapper
-public struct UserDefault<Value: PersistenceValue, Preferences: UserDefaultPreferences> {
-    let key: String
+public struct InMemory<Value: PersistenceValue, Preferences: InMemoryPreferences> {
     let defaultValue: Value?
 
     public var wrappedValue: Value? {
@@ -18,9 +13,8 @@ public struct UserDefault<Value: PersistenceValue, Preferences: UserDefaultPrefe
         }
     }
 
-    public init(wrappedValue: Value? = nil, _ key: String) {
+    public init(wrappedValue: Value? = nil) {
         self.defaultValue = wrappedValue
-        self.key = key
     }
 
     public static subscript(
@@ -38,9 +32,7 @@ public struct UserDefault<Value: PersistenceValue, Preferences: UserDefaultPrefe
 
             do {
                 let encoded = try JSONEncoder().encode(newValue)
-                let container = instance.userDefaults
-                let key = instance[keyPath: storageKeyPath].key
-                container.set(encoded, forKey: key)
+                instance.inMemoryDataStore[storageKeyPath] = encoded
                 instance.preferencesChangedSubject.send(wrappedKeyPath)
             } catch {
                 instance.handle(error: error)
@@ -52,11 +44,9 @@ public struct UserDefault<Value: PersistenceValue, Preferences: UserDefaultPrefe
         _enclosingInstance instance: Preferences,
         storage storageKeyPath: ReferenceWritableKeyPath<Preferences, Self>
     ) -> Value? {
-        let container = instance.userDefaults
-        let key = instance[keyPath: storageKeyPath].key
         let defaultValue = instance[keyPath: storageKeyPath].defaultValue
 
-        guard let data = container.data(forKey: key) else {
+        guard let data = instance.inMemoryDataStore[storageKeyPath] else {
             return defaultValue
         }
 

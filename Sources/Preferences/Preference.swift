@@ -3,22 +3,14 @@ import SwiftUI
 
 @propertyWrapper
 public struct Preference<Value: PersistenceValue, Preferences: PreferencesProtocol>: DynamicProperty {
-    private let actor: PreferenceActor<Value, Preferences>
     private let keyPath: ReferenceWritableKeyPath<Preferences, Value?>
     private let preferencesIdentifier: String
-    private var cancellables = Set<AnyCancellable>()
 
     private var preferences: Preferences {
         guard let preferences = PreferencesContainer.shared.resolve(forIdentifier: preferencesIdentifier) as? Preferences else {
             fatalError(PreferencesError.preferencesNotRegistered.localizedDescription)
         }
         return preferences
-    }
-
-    public var atomicValue: Value? {
-        get async {
-            await actor.value
-        }
     }
 
     public var wrappedValue: Value? {
@@ -35,8 +27,8 @@ public struct Preference<Value: PersistenceValue, Preferences: PreferencesProtoc
             get: {
                 wrappedValue
             },
-            set: {
-                wrappedValue = $0
+            set: { value in
+                wrappedValue = value
             }
         )
     }
@@ -45,7 +37,6 @@ public struct Preference<Value: PersistenceValue, Preferences: PreferencesProtoc
         _ keyPath: ReferenceWritableKeyPath<Preferences, Value?>,
         preferences: String
     ) {
-        self.actor = PreferenceActor(keyPath, preferences: preferences)
         self.keyPath = keyPath
         self.preferencesIdentifier = preferences
     }
@@ -69,13 +60,6 @@ public struct Preference<Value: PersistenceValue, Preferences: PreferencesProtoc
     }
 
     public func subscribe(storingTo cancellables: inout Set<AnyCancellable>, onReceiveValue: @escaping (Value?) -> Void) {
-        cancellables.insert(
-            addSubscriber(onReceiveValue: onReceiveValue)
-        )
-    }
-
-    public func atomicUpdate(to newValue: Value?) async {
-        await actor.update(to: newValue)
+        cancellables.insert(addSubscriber(onReceiveValue: onReceiveValue))
     }
 }
-

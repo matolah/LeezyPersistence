@@ -1,9 +1,5 @@
 import Foundation
 
-public protocol KeychainPreferences: PreferencesProtocol {
-    var keychainManager: KeychainManagerProtocol { get }
-}
-
 @propertyWrapper
 public struct Keychain<Value: PersistenceValue, Preferences: KeychainPreferences> {
     let key: String
@@ -64,4 +60,3 @@ public struct Keychain<Value: PersistenceValue, Preferences: KeychainPreferences
         }
     }
 }
-
