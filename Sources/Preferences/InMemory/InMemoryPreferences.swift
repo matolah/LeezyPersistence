@@ -1,5 +1,5 @@
 import Foundation
 
 public protocol InMemoryPreferences: PreferencesProtocol {
-    var inMemoryDataStore: InMemoryDataStore { get set }
+    var inMemoryDataStore: InMemoryDataStore { get }
 }
