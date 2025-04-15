@@ -18,4 +18,11 @@ class PreferencesContainerTests: XCTestCase {
         XCTAssertTrue(PreferencesContainer.shared.resolve(forIdentifier: "FakeBasePreferences") === preferences)
         XCTAssertTrue(PreferencesContainer.shared.resolve(forIdentifier: "BasePreferences") === preferences)
     }
+
+    func testClear() {
+        let preferences = BasePreferences(identifier: "BasePreferences")
+        XCTAssertTrue(PreferencesContainer.shared.resolve(forIdentifier: "BasePreferences") === preferences)
+        PreferencesContainer.shared.clear()
+        XCTAssertNil(PreferencesContainer.shared.resolve(forIdentifier: "BasePreferences"))
+    }
 }

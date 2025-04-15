@@ -1,7 +1,7 @@
 import Foundation
 
-final class PreferencesContainer {
-    static let shared = PreferencesContainer()
+public final class PreferencesContainer {
+    public static let shared = PreferencesContainer()
 
     private var services = [String: BasePreferences]()
     private let queue = DispatchQueue(label: "com.leezy.persistence.container.queue", attributes: .concurrent)
@@ -18,5 +18,9 @@ final class PreferencesContainer {
         queue.sync {
             services[identifier]
         }
+    }
+
+    public func clear() {
+        services = [:]
     }
 }
