@@ -63,3 +63,40 @@ public struct Preference<Value: PersistenceValue, Preferences: PreferencesProtoc
         cancellables.insert(addSubscriber(onReceiveValue: onReceiveValue))
     }
 }
+
+public extension Preference where Preferences: KeychainPreferences {
+    /// Attempts to retrieve the value from a Keychain-backed `@Preference` using biometric or passcode authentication.
+    ///
+    /// > ⚠️ This should only be called on `Preference` properties that reference a `Keychain`-backed property in the `Preferences` type.
+    /// Calling this method on a non-Keychain-backed preference will return `nil` and may trigger a debug assertion.
+    ///
+    /// - Parameter prompt: The prompt shown to the user during authentication.
+    /// - Returns: The securely retrieved value, or `nil` if authentication fails or the preference is not Keychain-backed.
+    func valueWithPrompt(_ prompt: String) -> Value? {
+        let label = mirrorLabel(from: keyPath)
+        let underscoredLabel = "_\(label)"
+
+        let mirror = Mirror(reflecting: preferences)
+        let keychainWrapper = mirror
+            .children
+            .first { child in
+                child.label == underscoredLabel
+            }?.value as? Keychain<Value, Preferences>
+        guard let keychainWrapper else {
+            // ⚠️ INTERNAL NOTE:
+            // This relies on Swift's underscored property wrapper convention.
+            // Ideally, we should migrate this to a macro-based or compiler-validated mechanism
+            // once macros support type resolution of property wrappers behind key paths.
+            assertionFailure("The preference property '\(label)' is not Keychain-backed")
+            return nil
+        }
+
+        return keychainWrapper.value(withPrompt: prompt, preferences: preferences)
+    }
+
+    private func mirrorLabel(from keyPath: ReferenceWritableKeyPath<Preferences, Value?>) -> String {
+        String(describing: keyPath)
+            .components(separatedBy: ".")
+            .last ?? "unknown"
+    }
+}

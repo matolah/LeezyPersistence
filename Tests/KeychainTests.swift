@@ -45,21 +45,23 @@ class KeychainTests: XCTestCase {
 
         testKey = testValue
         XCTAssertEqual(testKeyKeychainValue(), testValue)
+        XCTAssertNil(keychainManager.promptMessagePassed)
     }
 
     private func testKeyKeychainValue() -> String? {
-        let data = try! keychainManager.load("testKey", ofKind: .standard)!
+        let data = try! keychainManager.load("testKey", withPromptMessage: nil)!
         return try? JSONDecoder().decode(String.self, from: data)
     }
 
-    func testKeychainBiSaveAndLoad() throws {
+    func testKeychainValueWithPrompt() throws {
         let testValue = "TestValue"
 
         testKey = testValue
-        XCTAssertEqual(testKeyKeychainValue(), testValue)
+        XCTAssertEqual(_testKey.valueWithPrompt("Prompt"), testValue)
+        XCTAssertEqual(keychainManager.promptMessagePassed, "Prompt")
     }
 
-    func testUserDefaultValueChangedNotification() throws {
+    func testKeychainValueChangedNotification() throws {
         let testValue = "TestValue"
 
         let keyPath: ReferenceWritableKeyPath<KeychainMockPreferences, String?> = \.testKey

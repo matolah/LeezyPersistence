@@ -2,7 +2,6 @@ import Foundation
 
 @propertyWrapper
 public struct Keychain<Value: PersistenceValue, Preferences: KeychainPreferences> {
-    let kind: KeychainAccessKind
     let key: String
     let defaultValue: Value?
 
@@ -16,9 +15,8 @@ public struct Keychain<Value: PersistenceValue, Preferences: KeychainPreferences
         }
     }
 
-    public init(wrappedValue: Value? = nil, kind: KeychainAccessKind = .standard, _ key: String) {
+    public init(wrappedValue: Value? = nil, _ key: String) {
         defaultValue = wrappedValue
-        self.kind = kind
         self.key = key
     }
 
@@ -38,7 +36,7 @@ public struct Keychain<Value: PersistenceValue, Preferences: KeychainPreferences
             do {
                 let encoded = try PersistenceCoder.encode(newValue)
                 let value = instance[keyPath: storageKeyPath]
-                try instance.keychainManager.save(encoded, forKey: value.key, ofKind: value.kind)
+                try instance.keychainManager.save(encoded, forKey: value.key)
                 instance.preferencesChangedSubject.send(wrappedKeyPath)
             } catch {
                 instance.handle(error: error)
@@ -53,12 +51,24 @@ public struct Keychain<Value: PersistenceValue, Preferences: KeychainPreferences
         let defaultValue = instance[keyPath: storageKeyPath].defaultValue
         do {
             let value = instance[keyPath: storageKeyPath]
-            guard let data = try instance.keychainManager.load(value.key, ofKind: value.kind) else {
+            guard let data = try instance.keychainManager.load(value.key, withPromptMessage: nil) else {
                 return defaultValue
             }
             return try? PersistenceCoder.decode(Value.self, from: data)
         } catch {
             instance.handle(error: error)
+            return defaultValue
+        }
+    }
+
+    func value(withPrompt prompt: String, preferences: KeychainPreferences) -> Value? {
+        do {
+            guard let data = try preferences.keychainManager.load(key, withPromptMessage: prompt) else {
+                return defaultValue
+            }
+            return try? PersistenceCoder.decode(Value.self, from: data)
+        } catch {
+            preferences.handle(error: error)
             return defaultValue
         }
     }
