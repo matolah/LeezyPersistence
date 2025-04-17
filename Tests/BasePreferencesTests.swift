@@ -3,12 +3,12 @@ import XCTest
 
 @testable import LeezyPersistence
 
-class BasePreferencesTests: XCTestCase {
+final class BasePreferencesTests: XCTestCase {
     private var basePreferences: BasePreferences!
 
     override func setUp() {
         super.setUp()
-        basePreferences = BasePreferences(identifier: "BasePreferences")
+        basePreferences = BasePreferences()
     }
 
     override func tearDown() {
@@ -17,6 +17,6 @@ class BasePreferencesTests: XCTestCase {
     }
 
     func testBasePreferencesAutoRegister() {
-        XCTAssertTrue(PreferencesContainer.shared.resolve(forIdentifier: "BasePreferences") === basePreferences)
+        XCTAssertTrue(PreferencesContainer.shared.resolve(type: type(of: basePreferences)) === basePreferences)
     }
 }

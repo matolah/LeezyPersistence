@@ -13,13 +13,13 @@ final class FileTests: XCTestCase {
     }
 
     private class MockViewModel {
-        @Preference(\FileMockPreferences.testKey, preferences: "MockPreferences") var testKey
+        @Preference(\FileMockPreferences.testKey) var testKey
     }
 
     private var mockPreferences: FileMockPreferences!
     private var cancellables: Set<AnyCancellable>!
 
-    @Preference(\FileMockPreferences.testKey, preferences: "MockPreferences") var testKey
+    @Preference(\FileMockPreferences.testKey) var testKey
 
     override func setUp() {
         super.setUp()

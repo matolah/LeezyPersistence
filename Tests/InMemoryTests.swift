@@ -3,7 +3,7 @@ import XCTest
 
 @testable import LeezyPersistence
 
-class InMemoryTests: XCTestCase {
+final class InMemoryTests: XCTestCase {
     private class InMemoryMockPreferences: MockPreferences {
         @InMemory<String, InMemoryMockPreferences> var testKey: String?
 
@@ -13,13 +13,13 @@ class InMemoryTests: XCTestCase {
     }
 
     private class MockViewModel {
-        @Preference(\InMemoryMockPreferences.testKey, preferences: "MockPreferences") var testKey
+        @Preference(\InMemoryMockPreferences.testKey) var testKey
     }
 
     private var mockPreferences: InMemoryMockPreferences!
     private var cancellables: Set<AnyCancellable>!
 
-    @Preference(\InMemoryMockPreferences.testKey, preferences: "MockPreferences") var testKey
+    @Preference(\InMemoryMockPreferences.testKey) var testKey
 
     override func setUp() {
         super.setUp()

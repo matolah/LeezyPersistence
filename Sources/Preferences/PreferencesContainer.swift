@@ -3,24 +3,24 @@ import Foundation
 public final class PreferencesContainer {
     public static let shared = PreferencesContainer()
 
-    private var services = [String: BasePreferences]()
+    private var preferences: [String: any PreferencesProtocol] = [:]
     private let queue = DispatchQueue(label: "com.leezy.persistence.container.queue", attributes: .concurrent)
 
     private init() {}
 
-    func register(service: BasePreferences, forIdentifier identifier: String) {
+    func register(preferences: some PreferencesProtocol) {
         queue.async(flags: .barrier) {
-            self.services[identifier] = service
+            self.preferences[String(reflecting: type(of: preferences))] = preferences
         }
     }
 
-    func resolve(forIdentifier identifier: String) -> BasePreferences? {
+    func resolve<Preferences: PreferencesProtocol>(type: Preferences.Type = Preferences.self) -> Preferences? {
         queue.sync {
-            services[identifier]
+            preferences[String(reflecting: Preferences.self)] as? Preferences
         }
     }
 
     public func clear() {
-        services = [:]
+        preferences = [:]
     }
 }

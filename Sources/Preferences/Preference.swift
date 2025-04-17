@@ -4,10 +4,9 @@ import SwiftUI
 @propertyWrapper
 public struct Preference<Value: PersistenceValue, Preferences: PreferencesProtocol>: DynamicProperty {
     private let keyPath: ReferenceWritableKeyPath<Preferences, Value?>
-    private let preferencesIdentifier: String
 
     private var preferences: Preferences {
-        guard let preferences = PreferencesContainer.shared.resolve(forIdentifier: preferencesIdentifier) as? Preferences else {
+        guard let preferences = PreferencesContainer.shared.resolve(type: Preferences.self) else {
             fatalError(PreferencesError.preferencesNotRegistered.localizedDescription)
         }
         return preferences
@@ -33,12 +32,8 @@ public struct Preference<Value: PersistenceValue, Preferences: PreferencesProtoc
         )
     }
 
-    public init(
-        _ keyPath: ReferenceWritableKeyPath<Preferences, Value?>,
-        preferences: String
-    ) {
+    public init(_ keyPath: ReferenceWritableKeyPath<Preferences, Value?>) {
         self.keyPath = keyPath
-        preferencesIdentifier = preferences
     }
 
     public func addSubscriber(onReceiveValue: @escaping (Value?) -> Void) -> AnyCancellable {

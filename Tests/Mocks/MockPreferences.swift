@@ -9,12 +9,11 @@ class MockPreferences: BasePreferences, FilePreferences, InMemoryPreferences, Ke
     let userDefaults: UserDefaults
 
     init(
-        identifier: String = "MockPreferences",
         keychainManager: KeychainManagerProtocol = MockKeychainManager(),
         userDefaults: UserDefaults = UserDefaults.standard
     ) {
         self.keychainManager = keychainManager
         self.userDefaults = userDefaults
-        super.init(identifier: identifier)
+        super.init()
     }
 }

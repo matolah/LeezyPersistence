@@ -3,24 +3,23 @@ import XCTest
 
 @testable import LeezyPersistence
 
-class UserDefaultTests: XCTestCase {
+final class UserDefaultTests: XCTestCase {
     private class UserDefaultsMockPreferences: MockPreferences {
         @UserDefault<String, UserDefaultsMockPreferences>("testKey") var testKey: String?
 
         override init(
-            identifier: String = "MockPreferences",
             keychainManager: KeychainManagerProtocol = MockKeychainManager(),
             userDefaults: UserDefaults
         ) {
-            super.init(identifier: identifier, keychainManager: keychainManager, userDefaults: userDefaults)
+            super.init(keychainManager: keychainManager, userDefaults: userDefaults)
         }
     }
 
     private class MockViewModel {
-        @Preference(\UserDefaultsMockPreferences.testKey, preferences: "MockPreferences") var testKey
+        @Preference(\UserDefaultsMockPreferences.testKey) var testKey
     }
 
-    @Preference(\UserDefaultsMockPreferences.testKey, preferences: "MockPreferences") var testKey
+    @Preference(\UserDefaultsMockPreferences.testKey) var testKey
 
     private var mockPreferences: UserDefaultsMockPreferences!
     private var userDefaults: UserDefaults!
