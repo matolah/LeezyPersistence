@@ -9,3 +9,8 @@
 --header ignore
 --importgrouping alphabetized
 --exclude Generated
+--enable sortedImports
+--enable fileHeader
+--enable sortedSwitchCases
+--enable consecutiveBlankLines
+--enable trailingClosures

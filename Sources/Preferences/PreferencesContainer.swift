@@ -8,6 +8,10 @@ public final class PreferencesContainer {
 
     private init() {}
 
+    public func clear() {
+        preferences = [:]
+    }
+
     func register(preferences: some PreferencesProtocol) {
         queue.async(flags: .barrier) {
             self.preferences[String(reflecting: type(of: preferences))] = preferences
@@ -18,9 +22,5 @@ public final class PreferencesContainer {
         queue.sync {
             preferences[String(reflecting: Preferences.self)] as? Preferences
         }
-    }
-
-    public func clear() {
-        preferences = [:]
     }
 }

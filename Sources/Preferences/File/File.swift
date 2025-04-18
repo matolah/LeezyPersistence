@@ -2,8 +2,8 @@ import Foundation
 
 @propertyWrapper
 public struct File<Value: PersistenceValue, Preferences: FilePreferences> {
-    let key: String
     let defaultValue: Value?
+    let key: String
 
     public var wrappedValue: Value? {
         get {

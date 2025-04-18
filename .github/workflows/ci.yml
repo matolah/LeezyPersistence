@@ -20,8 +20,7 @@ jobs:
           xcode-version: latest-stable
 
       - name: Install tools from Brewfile
-        run: |
-          brew bundle --file=Brewfile
+        run: brew bundle --file=Brewfile
 
       - name: Build project
         run: swift build

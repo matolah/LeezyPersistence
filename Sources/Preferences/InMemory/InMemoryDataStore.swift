@@ -19,9 +19,9 @@ public final class InMemoryDataStore {
         }
     }
 
-    public func removeValue(forKey key: AnyKeyPath) {
-        queue.async(flags: .barrier) {
-            self.storage.removeValue(forKey: key)
+    public func contains(_ key: AnyKeyPath) -> Bool {
+        queue.sync {
+            storage.keys.contains(key)
         }
     }
 
@@ -31,9 +31,9 @@ public final class InMemoryDataStore {
         }
     }
 
-    public func contains(_ key: AnyKeyPath) -> Bool {
-        queue.sync {
-            storage.keys.contains(key)
+    public func removeValue(forKey key: AnyKeyPath) {
+        queue.async(flags: .barrier) {
+            self.storage.removeValue(forKey: key)
         }
     }
 }

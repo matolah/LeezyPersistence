@@ -1,8 +1,8 @@
 import Foundation
 
 public final class FileDataStore {
-    private let queue = DispatchQueue(label: "com.leezy.persistence.file.\(UUID())", attributes: .concurrent)
     private let baseURL: URL
+    private let queue = DispatchQueue(label: "com.leezy.persistence.file.\(UUID())", attributes: .concurrent)
 
     public init(directory: FileManager.SearchPathDirectory = .applicationSupportDirectory, subfolder: String = "LeezyPersistence") {
         let url = FileManager.default.urls(for: directory, in: .userDomainMask).first!

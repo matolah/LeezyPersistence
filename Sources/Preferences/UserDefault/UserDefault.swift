@@ -2,8 +2,8 @@ import Foundation
 
 @propertyWrapper
 public struct UserDefault<Value: PersistenceValue, Preferences: UserDefaultPreferences> {
-    let key: String
     let defaultValue: Value?
+    let key: String
 
     public var wrappedValue: Value? {
         get {

@@ -4,6 +4,7 @@ import Foundation
 
 class MockKeychainManager: KeychainManagerProtocol {
     var values = [String: Data]()
+    
     private(set) var promptMessagePassed: String?
 
     func load(_ key: String, withPromptMessage promptMessage: String?) throws -> Data? {

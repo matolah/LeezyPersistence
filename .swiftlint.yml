@@ -10,16 +10,21 @@ excluded:
 opt_in_rules:
   - empty_count
   - force_unwrapping
-  - closure_spacing
   - unowned_variable_capture
   - array_init
   - yoda_condition
   - attributes
+  - explicit_init
+  - sorted_imports
+  - trailing_closure
+  - redundant_nil_coalescing
+  - file_types_order
+  - closure_end_indentation
 
 disabled_rules:
-  - line_length # Allow flexibility in some cases
-  - identifier_name # Avoid flagging short variables like i/j/x
-  - type_name # Some wrappers like `InMemory<String, Preferences>` can be long
+  - line_length
+  - identifier_name
+  - type_name
 
 reporter: xcode
 
