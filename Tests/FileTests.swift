@@ -30,6 +30,7 @@ final class FileTests: XCTestCase {
     override func tearDown() {
         cancellables = nil
         mockPreferences = nil
+        testKey = nil
         super.tearDown()
     }
 
@@ -41,8 +42,21 @@ final class FileTests: XCTestCase {
     }
 
     private func testKeyFileValue() -> String? {
-        let data = mockPreferences.fileDataStore["test.key"]!
+        guard let data = mockPreferences.fileDataStore["test.key"] else {
+            return nil
+        }
         return try? JSONDecoder().decode(String.self, from: data)
+    }
+
+    func testDyamicKeyFileSaveAndLoad() throws {
+        let testValue = "testValue"
+        let testDynamicValue = "testDynamicValue"
+
+        testKey = testValue
+        _testKey["testDynamicKey"] = testDynamicValue
+        let value = try? JSONDecoder().decode(String.self, from: mockPreferences.fileDataStore["[testDynamicKey] test.key"]!)
+        XCTAssertEqual(value, testDynamicValue)
+        XCTAssertEqual(testKeyFileValue(), testValue)
     }
 
     func testUserDefaultValueChangedNotification() throws {

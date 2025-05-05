@@ -1,7 +1,7 @@
 import Foundation
 
 @propertyWrapper
-public struct UserDefault<Value: PersistenceValue, Preferences: UserDefaultPreferences> {
+public struct UserDefault<Value: PersistenceValue, Preferences: UserDefaultPreferences>: DynamicPreferenceValueProvider {
     let defaultValue: Value?
     let key: String
 
@@ -49,14 +49,48 @@ public struct UserDefault<Value: PersistenceValue, Preferences: UserDefaultPrefe
         _enclosingInstance instance: Preferences,
         storage storageKeyPath: ReferenceWritableKeyPath<Preferences, Self>
     ) -> Value? {
-        let container = instance.userDefaults
-        let key = instance[keyPath: storageKeyPath].key
-        let defaultValue = instance[keyPath: storageKeyPath].defaultValue
+        let userDefault = instance[keyPath: storageKeyPath]
+        return userDefault.value(withKey: userDefault.key, using: instance)
+    }
 
-        guard let data = container.data(forKey: key) else {
+    private func value(withKey key: String, using preferences: Preferences) -> Value? {
+        guard let data = preferences.userDefaults.data(forKey: key) else {
             return defaultValue
         }
 
         return try? PersistenceCoder.decode(Value.self, from: data)
+    }
+
+    private func setValue<V>(
+        _ newValue: Value?,
+        withKey key: String,
+        using preferences: Preferences,
+        wrappedKeyPath: ReferenceWritableKeyPath<Preferences, V?>
+    ) {
+        guard value(withKey: key, using: preferences) != newValue else {
+            return
+        }
+
+        do {
+            let encoded = try PersistenceCoder.encode(newValue)
+            let container = preferences.userDefaults
+            container.set(encoded, forKey: key)
+            preferences.preferencesChangedSubject.send(wrappedKeyPath)
+        } catch {
+            preferences.handle(error: error)
+        }
+    }
+
+    public func value(withKeyPrefix keyPrefix: String, using preferences: Preferences) -> Value? {
+        return value(withKey: key.withPrefix(keyPrefix), using: preferences)
+    }
+
+    public func setValue<V>(
+        _ newValue: Value?,
+        withKeyPrefix keyPrefix: String,
+        using preferences: Preferences,
+        wrappedKeyPath: ReferenceWritableKeyPath<Preferences, V?>
+    ) {
+        setValue(newValue, withKey: key.withPrefix(keyPrefix), using: preferences, wrappedKeyPath: wrappedKeyPath)
     }
 }

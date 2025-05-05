@@ -48,8 +48,21 @@ final class UserDefaultTests: XCTestCase {
     }
 
     private func testKeyUserDefaultsValue() -> String? {
-        let data = userDefaults.data(forKey: "testKey")!
+        guard let data = userDefaults.data(forKey: "testKey") else {
+            return nil
+        }
         return try? JSONDecoder().decode(String.self, from: data)
+    }
+    
+    func testDyamicKeyUserDefaultSaveAndLoad() throws {
+        let testValue = "testValue"
+        let testDynamicValue = "testDynamicValue"
+
+        testKey = testValue
+        _testKey["testDynamicKey"] = testDynamicValue
+        let value = try? JSONDecoder().decode(String.self, from: userDefaults.data(forKey: "[testDynamicKey] testKey")!)
+        XCTAssertEqual(value, testDynamicValue)
+        XCTAssertEqual(testKeyUserDefaultsValue(), testValue)
     }
 
     func testUserDefaultValueChangedNotification() throws {

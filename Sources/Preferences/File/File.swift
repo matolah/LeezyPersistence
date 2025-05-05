@@ -1,7 +1,7 @@
 import Foundation
 
 @propertyWrapper
-public struct File<Value: PersistenceValue, Preferences: FilePreferences> {
+public struct File<Value: PersistenceValue, Preferences: FilePreferences>: DynamicPreferenceValueProvider {
     let defaultValue: Value?
     let key: String
 
@@ -29,18 +29,8 @@ public struct File<Value: PersistenceValue, Preferences: FilePreferences> {
             value(_enclosingInstance: instance, storage: storageKeyPath)
         }
         set {
-            guard value(_enclosingInstance: instance, storage: storageKeyPath) != newValue else {
-                return
-            }
-
-            do {
-                let encoded = try PersistenceCoder.encode(newValue)
-                let key = instance[keyPath: storageKeyPath].key
-                instance.fileDataStore[key] = encoded
-                instance.preferencesChangedSubject.send(wrappedKeyPath)
-            } catch {
-                instance.handle(error: error)
-            }
+            let file = instance[keyPath: storageKeyPath]
+            file.setValue(newValue, withKey: file.key, using: instance, wrappedKeyPath: wrappedKeyPath)
         }
     }
 
@@ -48,13 +38,47 @@ public struct File<Value: PersistenceValue, Preferences: FilePreferences> {
         _enclosingInstance instance: Preferences,
         storage storageKeyPath: ReferenceWritableKeyPath<Preferences, Self>
     ) -> Value? {
-        let value = instance[keyPath: storageKeyPath]
-        let defaultValue = value.defaultValue
+        let file = instance[keyPath: storageKeyPath]
+        return file.value(withKey: file.key, using: instance)
+    }
 
-        guard let data = instance.fileDataStore[value.key] else {
+    private func value(withKey key: String, using preferences: Preferences) -> Value? {
+        guard let data = preferences.fileDataStore[key] else {
             return defaultValue
         }
 
         return try? PersistenceCoder.decode(Value.self, from: data)
+    }
+
+    private func setValue<V>(
+        _ newValue: Value?,
+        withKey key: String,
+        using preferences: Preferences,
+        wrappedKeyPath: ReferenceWritableKeyPath<Preferences, V?>
+    ) {
+        guard value(withKey: key, using: preferences) != newValue else {
+            return
+        }
+
+        do {
+            let encoded = try PersistenceCoder.encode(newValue)
+            preferences.fileDataStore[key] = encoded
+            preferences.preferencesChangedSubject.send(wrappedKeyPath)
+        } catch {
+            preferences.handle(error: error)
+        }
+    }
+
+    public func value(withKeyPrefix keyPrefix: String, using preferences: Preferences) -> Value? {
+        return value(withKey: key.withPrefix(keyPrefix), using: preferences)
+    }
+
+    public func setValue<V>(
+        _ newValue: Value?,
+        withKeyPrefix keyPrefix: String,
+        using preferences: Preferences,
+        wrappedKeyPath: ReferenceWritableKeyPath<Preferences, V?>
+    ) {
+        setValue(newValue, withKey: key.withPrefix(keyPrefix), using: preferences, wrappedKeyPath: wrappedKeyPath)
     }
 }

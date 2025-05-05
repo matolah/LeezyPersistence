@@ -3,9 +3,9 @@ import SwiftUI
 
 @propertyWrapper
 public struct Preference<Value: PersistenceValue, Preferences: PreferencesProtocol>: DynamicProperty {
-    private let keyPath: ReferenceWritableKeyPath<Preferences, Value?>
+    let keyPath: ReferenceWritableKeyPath<Preferences, Value?>
 
-    private var preferences: Preferences {
+    var preferences: Preferences {
         guard let preferences = PreferencesContainer.shared.resolve(type: Preferences.self) else {
             fatalError(PreferencesError.preferencesNotRegistered.localizedDescription)
         }
@@ -32,8 +32,42 @@ public struct Preference<Value: PersistenceValue, Preferences: PreferencesProtoc
         )
     }
 
+    var dynamicWrapper: (any AnyDynamicPreferenceValueProvider)? {
+        guard let dynamicWrapper = resolvePropertyWrapper() as? (any DynamicPreferenceValueProvider) else {
+            assertionFailure("The resolved wrapper does not conform to `DynamicPreferenceValueProvider`.")
+            return nil
+        }
+        return dynamicWrapper.eraseToAnyDynamicPreferenceValueProvider()
+    }
+    
     public init(_ keyPath: ReferenceWritableKeyPath<Preferences, Value?>) {
         self.keyPath = keyPath
+    }
+
+    /// Accesses or modifies a dynamically-keyed preference value using a key prefix.
+    ///
+    /// This subscript is used when your preference key needs to vary based on runtime information
+    /// — for example, when storing values per transaction ID, user ID, or other scoped keys.
+    /// It allows you to provide a base key (e.g. `"test.key"`) and dynamically prepend a
+    /// prefix to differentiate stored values (e.g. `"[1234] test.key"`).
+    ///
+    /// - Parameter keyPrefix: A runtime string that scopes the preference (e.g. a transaction ID).
+    /// - Returns: The value stored under the dynamically-prefixed key, or `nil` if none exists.
+    ///
+    /// ### Usage Example:
+    /// ```swift
+    /// _preference["user_42"] = "ScopedValue"
+    /// print(_preference["user_42"]) // => "ScopedValue"
+    /// ```
+    ///
+    /// Note: The base preference value (accessed via `wrappedValue`) remains unaffected.
+    public subscript(keyPrefix: String) -> Value? {
+        get {
+            dynamicWrapper?.value(withKeyPrefix: keyPrefix, using: preferences) as? Value
+        }
+        set {
+            dynamicWrapper?.setValue(newValue, withKeyPrefix: keyPrefix, using: preferences, wrappedKeyPath: keyPath)
+        }
     }
 
     public func addSubscriber(onReceiveValue: @escaping (Value?) -> Void) -> AnyCancellable {
@@ -56,42 +90,5 @@ public struct Preference<Value: PersistenceValue, Preferences: PreferencesProtoc
 
     public func subscribe(storingTo cancellables: inout Set<AnyCancellable>, onReceiveValue: @escaping (Value?) -> Void) {
         cancellables.insert(addSubscriber(onReceiveValue: onReceiveValue))
-    }
-}
-
-public extension Preference where Preferences: KeychainPreferences {
-    /// Attempts to retrieve the value from a Keychain-backed `@Preference` using biometric or passcode authentication.
-    ///
-    /// > ⚠️ This should only be called on `Preference` properties that reference a `Keychain`-backed property in the `Preferences` type.
-    /// Calling this method on a non-Keychain-backed preference will return `nil` and may trigger a debug assertion.
-    ///
-    /// - Parameter prompt: The prompt shown to the user during authentication.
-    /// - Returns: The securely retrieved value, or `nil` if authentication fails or the preference is not Keychain-backed.
-    func valueWithPrompt(_ prompt: String) -> Value? {
-        let label = mirrorLabel(from: keyPath)
-        let underscoredLabel = "_\(label)"
-
-        let mirror = Mirror(reflecting: preferences)
-        let keychainWrapper = mirror
-            .children
-            .first { child in
-                child.label == underscoredLabel
-            }?.value as? Keychain<Value, Preferences>
-        guard let keychainWrapper else {
-            // ⚠️ INTERNAL NOTE:
-            // This relies on Swift's underscored property wrapper convention.
-            // Ideally, we should migrate this to a macro-based or compiler-validated mechanism
-            // once macros support type resolution of property wrappers behind key paths.
-            assertionFailure("The preference property '\(label)' is not Keychain-backed")
-            return nil
-        }
-
-        return keychainWrapper.value(withPrompt: prompt, preferences: preferences)
-    }
-
-    private func mirrorLabel(from keyPath: ReferenceWritableKeyPath<Preferences, Value?>) -> String {
-        String(describing: keyPath)
-            .components(separatedBy: ".")
-            .last ?? "unknown"
     }
 }

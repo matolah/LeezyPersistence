@@ -20,6 +20,7 @@ final class KeychainTests: XCTestCase {
     }
 
     @Preference(\KeychainMockPreferences.testKey) var testKey
+    @ProtectedPreference(\KeychainMockPreferences.testKey) var testPromptKey
 
     private var mockPreferences: KeychainMockPreferences!
     private var keychainManager: MockKeychainManager!
@@ -48,15 +49,28 @@ final class KeychainTests: XCTestCase {
     }
 
     private func testKeyKeychainValue() -> String? {
-        let data = try! keychainManager.load("testKey", withPromptMessage: nil)!
+        guard let data = try! keychainManager.load("testKey", withPromptMessage: nil) else {
+            return nil
+        }
         return try? JSONDecoder().decode(String.self, from: data)
+    }
+
+    func testDyamicKeyKeychainSaveAndLoad() throws {
+        let testValue = "testValue"
+        let testDynamicValue = "testDynamicValue"
+
+        testKey = testValue
+        _testKey["testDynamicKey"] = testDynamicValue
+        let value = try? JSONDecoder().decode(String.self, from: try! keychainManager.load("[testDynamicKey] testKey", withPromptMessage: nil)!)
+        XCTAssertEqual(value, testDynamicValue)
+        XCTAssertEqual(testKeyKeychainValue(), testValue)
     }
 
     func testKeychainValueWithPrompt() throws {
         let testValue = "TestValue"
 
         testKey = testValue
-        XCTAssertEqual(_testKey.valueWithPrompt("Prompt"), testValue)
+        XCTAssertEqual(_testPromptKey["Prompt"], testValue)
         XCTAssertEqual(keychainManager.promptMessagePassed, "Prompt")
     }
 

@@ -20,6 +20,11 @@ final class FileDataStoreTests: XCTestCase {
         key = "test.key"
     }
 
+    override func tearDown() {
+        store[key] = nil
+        super.tearDown()
+    }
+
     func testSetAndGetValue() throws {
         let value = "Hello"
         let data = try JSONEncoder().encode(value)
