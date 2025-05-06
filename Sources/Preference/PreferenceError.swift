@@ -1,5 +1,5 @@
 import Foundation
 
-enum PreferencesError: Error {
+enum PreferenceError: Error {
     case preferencesNotRegistered
 }

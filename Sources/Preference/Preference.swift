@@ -7,7 +7,7 @@ public struct Preference<Value: PersistenceValue, Preferences: PreferencesProtoc
 
     var preferences: Preferences {
         guard let preferences = PreferencesContainer.shared.resolve(type: Preferences.self) else {
-            fatalError(PreferencesError.preferencesNotRegistered.localizedDescription)
+            fatalError(PreferenceError.preferencesNotRegistered.localizedDescription)
         }
         return preferences
     }
