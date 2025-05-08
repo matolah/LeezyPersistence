@@ -12,7 +12,7 @@
   </p>
 </div>
 
-## 📦 What is LeezyPersistence?
+## What is LeezyPersistence?
 
 **LeezyPersistence** is a lightweight, type-safe persistence library for Swift.  
 It provides intuitive property wrappers for saving and retrieving values from:
@@ -26,7 +26,7 @@ No need to manage different APIs - just use one unified, clean interface.
 
 Inspired by [this article on AppStorage](https://www.avanderlee.com/swift/appstorage-explained).
 
-## 📥 Installation
+## Installation
 
 Add `LeezyPersistence` to your project using **Swift Package Manager**:
 
@@ -36,7 +36,7 @@ dependencies: [
 ]
 ```
 
-## 🚀 Usage
+## Usage
 
 1. Create your preferences class
 
