@@ -41,14 +41,23 @@ dependencies: [
 1. Create your preferences class
 
 ```swift
-final class SharedPreferences: BasePreferences {
+final class SharedPreferences: BasePreferences, KeychainPreferences, UserDefaultPreferences {
+    let keychainManager: KeychainManagerProtocol
+    let userDefaults: UserDefaults
+
     @UserDefault<Bool, SharedPreferences>("hasSeenTutorial") var hasSeenTutorial: Bool?
 
     @Keychain<String, SharedPreferences>("accessToken") var accessToken: String?
 
-    @InMemory<Int, SharedPreferences>() var cachedPage: Int?
+    @InMemory<Int, SharedPreferences> var cachedPage: Int?
 
     @File<[String], SharedPreferences>("history.json") var savedHistory: [String]?
+
+    init(keychainManager: KeychainManagerProtocol, userDefaults: UserDefaults) {
+      self.keychainManager = keychainManager
+      self.userDefaults = userDefaults
+      super.init()
+    }
 
     override func handle(error: Error) {
         print("Error: \(error)")
@@ -56,18 +65,13 @@ final class SharedPreferences: BasePreferences {
 }
 ```
 
-2. Register it with a unique identifier
+2. Register it
 
 ```swift
-enum PreferencesIdentifier: String {
-    case shared
-}
-
 @main
 struct MyApp: App {
     init() {
         sharedPreferences = SharedPreferences(
-            identifier: PreferencesIdentifier.shared.rawValue,
             keychainManager: MyKeychainManager(),
             userDefaults: .standard
         )
@@ -85,15 +89,18 @@ struct MyApp: App {
 
 ```swift
 final class ContentViewModel: ObservableObject {
+    private let userID: String
+
     @Published var isInHomePage = false
 
-    @Preference(\SharedPreferences.hasSeenTutorial, preferences: PreferencesIdentifier.shared.rawValue) var hasSeenTutorial
+    @Preference(\SharedPreferences.hasSeenTutorial) var hasSeenTutorial
 
-    @Preference(\SharedPreferences.accessToken, preferences: PreferencesIdentifier.shared.rawValue) var accessToken
+    @Preference(\SharedPreferences.accessToken) var accessToken
 
     private var cancellables = Set<AnyCancellable>()
 
-    init() {
+    init(userID: String) {
+        self.userID = userID
         _accessToken.subscribe(storingTo: &cancellables) { [weak self] _ in
             guard let self, self.hasSeenTutorial == true else { 
                 return 
@@ -101,22 +108,26 @@ final class ContentViewModel: ObservableObject {
             self.isInHomePage = true
         }
     }
+
+    func markTutorialAsSeen() {
+      // Access user-specific `Preference` using a dynamic key
+      hasSeenTutorial[userID] = true
+    }
 }
 ```
 
 4. Create as many `Preferences` classes with context-specific preferences as you'd like:
 
 ```swift
-final class SharedPreferences: BasePreferences {
-    @UserDefault<Bool, SharedPreferences>("hasSeenTutorial") var hasSeenTutorial: Bool?
-
-    override func handle(error: Error) {
-        print("Error: \(error)")
-    }
-}
-
 final class OnboardingPreferences: BasePreferences {
+    let keychainManager: KeychainManagerProtocol
+
     @Keychain<String, OnboardingPreferences>("accessToken") var accessToken: String?
+
+    init(keychainManager: KeychainManagerProtocol) {
+      self.keychainManager = keychainManager
+      super.init()
+    }
 
     override func handle(error: Error) {
         print("Error: \(error)")
