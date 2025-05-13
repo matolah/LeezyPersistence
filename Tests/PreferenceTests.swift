@@ -26,6 +26,8 @@ final class PreferenceTests: XCTestCase {
 
     private var updatedProperty = ""
 
+    @Preference(\InMemoryMockPreferences.testKey) private static var testStaticKey
+
     @Preference(\InMemoryMockPreferences.testKey) var testKey {
         didSet {
             updatedProperty = "updated"
@@ -48,5 +50,12 @@ final class PreferenceTests: XCTestCase {
         let expectedValue = "updated"
         XCTAssertEqual(updatedProperty, expectedValue)
         XCTAssertEqual(mockPreferences.updatedProperty, expectedValue)
+    }
+
+    func testStaticPreference() {
+        let expectedValue = "TestValue"
+        Self.testStaticKey = expectedValue
+
+        XCTAssertEqual(Self.testStaticKey, expectedValue)
     }
 }
