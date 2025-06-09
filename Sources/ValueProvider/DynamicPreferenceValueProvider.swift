@@ -51,12 +51,16 @@ private struct DynamicPreferenceValueProviderWrapper<Base: DynamicPreferenceValu
         using preferences: P,
         wrappedKeyPath: ReferenceWritableKeyPath<P, V?>
     ) {
-        guard let preferences = preferences as? Base.Preferences,
-              let newValue = newValue as? Base.Value else {
+        guard let preferences = preferences as? Base.Preferences else {
             return
         }
 
         let castedKeyPath = wrappedKeyPath as! ReferenceWritableKeyPath<Base.Preferences, Base.Value?>
-        base.setValue(newValue, withKeyPrefix: keyPrefix, using: preferences, wrappedKeyPath: castedKeyPath)
+
+        if let newValue = newValue as? Base.Value {
+            base.setValue(newValue, withKeyPrefix: keyPrefix, using: preferences, wrappedKeyPath: castedKeyPath)
+        } else if newValue == nil {
+            base.setValue(nil, withKeyPrefix: keyPrefix, using: preferences, wrappedKeyPath: castedKeyPath)
+        }
     }
 }

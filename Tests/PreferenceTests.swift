@@ -4,8 +4,8 @@ import XCTest
 @testable import LeezyPersistence
 
 final class PreferenceTests: XCTestCase {
-    private class InMemoryMockPreferences: MockPreferences {
-        @InMemory<String, InMemoryMockPreferences> var testKey: String? {
+    private class FileMockPreferences: MockPreferences {
+        @File<String, FileMockPreferences>("test") var testKey: String? {
             didSet {
                 updatedProperty = "updated"
             }
@@ -13,22 +13,22 @@ final class PreferenceTests: XCTestCase {
 
         var updatedProperty = ""
 
-        var testKeyStorageKeyPath: ReferenceWritableKeyPath<InMemoryMockPreferences, InMemory<String, InMemoryMockPreferences>> {
-            \InMemoryMockPreferences._testKey
+        var testKeyStorageKeyPath: ReferenceWritableKeyPath<FileMockPreferences, File<String, FileMockPreferences>> {
+            \FileMockPreferences._testKey
         }
     }
 
     private class MockViewModel {
-        @Preference(\InMemoryMockPreferences.testKey) var testKey
+        @Preference(\FileMockPreferences.testKey) var testKey
     }
 
-    private var mockPreferences: InMemoryMockPreferences!
+    private var mockPreferences: FileMockPreferences!
 
     private var updatedProperty = ""
 
-    @Preference(\InMemoryMockPreferences.testKey) private static var testStaticKey
+    @Preference(\FileMockPreferences.testKey) private static var testStaticKey
 
-    @Preference(\InMemoryMockPreferences.testKey) var testKey {
+    @Preference(\FileMockPreferences.testKey) var testKey {
         didSet {
             updatedProperty = "updated"
         }
@@ -36,7 +36,7 @@ final class PreferenceTests: XCTestCase {
 
     override func setUp() {
         super.setUp()
-        mockPreferences = InMemoryMockPreferences()
+        mockPreferences = FileMockPreferences()
     }
 
     override func tearDown() {
@@ -57,5 +57,13 @@ final class PreferenceTests: XCTestCase {
         Self.testStaticKey = expectedValue
 
         XCTAssertEqual(Self.testStaticKey, expectedValue)
+    }
+
+    func testNilDynamicPreference() {
+        let dynamicKey = "DynamicKey"
+        _testKey[dynamicKey] = "Test"
+        _testKey[dynamicKey] = nil
+
+        XCTAssertNil(_testKey[dynamicKey])
     }
 }
