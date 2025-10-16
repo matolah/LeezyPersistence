@@ -5,7 +5,7 @@ import XCTest
 
 final class PreferenceTests: XCTestCase {
     private class FileMockPreferences: MockPreferences {
-        @File<String, FileMockPreferences>("test") var testKey: String? {
+        @File<Data, FileMockPreferences>("file_data") var testKey: Data? {
             didSet {
                 updatedProperty = "updated"
             }
@@ -13,7 +13,7 @@ final class PreferenceTests: XCTestCase {
 
         var updatedProperty = ""
 
-        var testKeyStorageKeyPath: ReferenceWritableKeyPath<FileMockPreferences, File<String, FileMockPreferences>> {
+        var testKeyStorageKeyPath: ReferenceWritableKeyPath<FileMockPreferences, File<Data, FileMockPreferences>> {
             \FileMockPreferences._testKey
         }
     }
@@ -45,7 +45,7 @@ final class PreferenceTests: XCTestCase {
     }
 
     func testPreferencePropertyObserver() {
-        testKey = "TestValue"
+        testKey = Data()
 
         let expectedValue = "updated"
         XCTAssertEqual(updatedProperty, expectedValue)
@@ -53,17 +53,13 @@ final class PreferenceTests: XCTestCase {
     }
 
     func testStaticPreference() {
-        let expectedValue = "TestValue"
+        let expectedValue = Data()
         Self.testStaticKey = expectedValue
 
         XCTAssertEqual(Self.testStaticKey, expectedValue)
     }
 
     func testNilDynamicPreference() {
-        let dynamicKey = "DynamicKey"
-        _testKey[dynamicKey] = "Test"
-        _testKey[dynamicKey] = nil
-
-        XCTAssertNil(_testKey[dynamicKey])
+        XCTAssertNil(_testKey["DynamicKey", provider: \FileMockPreferences.$testKey])
     }
 }

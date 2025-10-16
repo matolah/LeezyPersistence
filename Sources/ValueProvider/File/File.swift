@@ -5,6 +5,10 @@ public struct File<Value: PersistenceValue, Preferences: FilePreferences>: Dynam
     let defaultValue: Value?
     let key: String
 
+    public var projectedValue: any AnyDynamicPreferenceValueProvider {
+        eraseToAnyDynamicPreferenceValueProvider()
+    }
+
     public var wrappedValue: Value? {
         get {
             PropertyWrapperFailures.wrappedValueAssertionFailure()

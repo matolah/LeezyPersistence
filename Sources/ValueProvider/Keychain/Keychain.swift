@@ -5,6 +5,10 @@ public struct Keychain<Value: PersistenceValue, Preferences: KeychainPreferences
     let defaultValue: Value?
     let key: String
 
+    public var projectedValue: any AnyDynamicPreferenceValueProvider {
+        eraseToAnyDynamicPreferenceValueProvider()
+    }
+
     public var wrappedValue: Value? {
         get {
             PropertyWrapperFailures.wrappedValueAssertionFailure()

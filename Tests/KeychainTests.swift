@@ -60,7 +60,7 @@ final class KeychainTests: XCTestCase {
         let testDynamicValue = "testDynamicValue"
 
         testKey = testValue
-        _testKey["testDynamicKey"] = testDynamicValue
+        _testKey["testDynamicKey", provider: \KeychainMockPreferences.$testKey] = testDynamicValue
         let value = try? JSONDecoder().decode(String.self, from: try! keychainManager.load("[testDynamicKey] testKey", withPromptMessage: nil)!)
         XCTAssertEqual(value, testDynamicValue)
         XCTAssertEqual(testKeyKeychainValue(), testValue)

@@ -59,7 +59,7 @@ final class UserDefaultTests: XCTestCase {
         let testDynamicValue = "testDynamicValue"
 
         testKey = testValue
-        _testKey["testDynamicKey"] = testDynamicValue
+        _testKey["testDynamicKey", provider: \UserDefaultsMockPreferences.$testKey] = testDynamicValue
         let value = try? JSONDecoder().decode(String.self, from: userDefaults.data(forKey: "[testDynamicKey] testKey")!)
         XCTAssertEqual(value, testDynamicValue)
         XCTAssertEqual(testKeyUserDefaultsValue(), testValue)

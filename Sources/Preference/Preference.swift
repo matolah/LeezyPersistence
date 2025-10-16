@@ -52,6 +52,9 @@ public struct Preference<Value: PersistenceValue, Preferences: PreferencesProtoc
     /// prefix to differentiate stored values (e.g. `"[1234] test.key"`).
     ///
     /// - Parameter keyPrefix: A runtime string that scopes the preference (e.g. a transaction ID).
+    /// - Parameter provider: A key path to the projected value (e.g. `\Preferences.$fileData`) that resolves
+    /// to the underlying storage provider conforming to `AnyDynamicPreferenceValueProvider`.
+    /// This identifies the exact property wrapper responsible for dynamic value management.
     /// - Returns: The value stored under the dynamically-prefixed key, or `nil` if none exists.
     ///
     /// ### Usage Example:
@@ -61,7 +64,10 @@ public struct Preference<Value: PersistenceValue, Preferences: PreferencesProtoc
     /// ```
     ///
     /// Note: The base preference value (accessed via `wrappedValue`) remains unaffected.
-    public subscript(keyPrefix: String) -> Value? {
+    public subscript(
+        keyPrefix: String,
+        provider providerKeyPath: KeyPath<Preferences, AnyDynamicPreferenceValueProvider>
+    ) -> Value? {
         get {
             dynamicWrapper?.value(withKeyPrefix: keyPrefix, using: preferences) as? Value
         }

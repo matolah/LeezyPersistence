@@ -15,7 +15,7 @@ public protocol DynamicPreferenceValueProvider {
 }
 
 // Internal implementation detail for type erasure
-protocol AnyDynamicPreferenceValueProvider {
+public protocol AnyDynamicPreferenceValueProvider {
     func value<P: PreferencesProtocol>(withKeyPrefix keyPrefix: String, using preferences: P) -> Any?
     func setValue<P: PreferencesProtocol, V>(
         _ newValue: V?,
