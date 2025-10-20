@@ -81,6 +81,11 @@ final class KeychainTests: XCTestCase {
 
     func testKeychainValueWithPromptAndError() throws {
         keychainManager.error = NSError()
+        #if os(macOS)
+        if ProcessInfo.processInfo.environment["CI"] == "true" {
+            throw XCTSkip("Skipping keychain prompt test on CI (no UI session).")
+        }
+        #endif
         switch _testPromptKey["Prompt", provider: \KeychainMockPreferences.$testKey] {
         case .success:
             XCTFail("Failed to resolve Keychain protected value")
