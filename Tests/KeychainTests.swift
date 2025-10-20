@@ -60,7 +60,7 @@ final class KeychainTests: XCTestCase {
         let testDynamicValue = "testDynamicValue"
 
         testKey = testValue
-        _testKey["testDynamicKey", provider: \KeychainMockPreferences.$testKey] = testDynamicValue
+        _testKey[keyPrefix: "testDynamicKey", provider: \KeychainMockPreferences.$testKey] = testDynamicValue
         let value = try? JSONDecoder().decode(String.self, from: try! keychainManager.load("[testDynamicKey] testKey", withPromptMessage: nil)!)
         XCTAssertEqual(value, testDynamicValue)
         XCTAssertEqual(testKeyKeychainValue(), testValue)
@@ -70,7 +70,7 @@ final class KeychainTests: XCTestCase {
         let testValue = "TestValue"
 
         testKey = testValue
-        switch _testPromptKey["Prompt"] {
+        switch _testPromptKey["Prompt", provider: \KeychainMockPreferences.$testKey] {
         case .success(let value):
             XCTAssertEqual(value, testValue)
         case .failure:
@@ -81,7 +81,7 @@ final class KeychainTests: XCTestCase {
 
     func testKeychainValueWithPromptAndError() throws {
         keychainManager.error = NSError()
-        switch _testPromptKey["Prompt"] {
+        switch _testPromptKey["Prompt", provider: \KeychainMockPreferences.$testKey] {
         case .success:
             XCTFail("Failed to resolve Keychain protected value")
         case .failure:

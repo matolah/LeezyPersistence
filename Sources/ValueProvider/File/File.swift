@@ -5,7 +5,7 @@ public struct File<Value: PersistenceValue, Preferences: FilePreferences>: Dynam
     let defaultValue: Value?
     let key: String
 
-    public var projectedValue: any AnyDynamicPreferenceValueProvider {
+    public var projectedValue: AnyDynamicPreferenceValueProvider {
         eraseToAnyDynamicPreferenceValueProvider()
     }
 

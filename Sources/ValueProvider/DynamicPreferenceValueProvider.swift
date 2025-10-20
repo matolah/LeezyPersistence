@@ -1,11 +1,12 @@
 import Foundation
 
-/// Provides dynamic value access for preference property wrappers that support key prefixing.
-/// This allows preferences to be stored and retrieved with dynamic keys at runtime.
+/// Concrete providers (e.g., File, UserDefault, Keychain) implement this.
 public protocol DynamicPreferenceValueProvider {
     associatedtype Value
     associatedtype Preferences: PreferencesProtocol
+
     func value(withKeyPrefix keyPrefix: String, using preferences: Preferences) -> Value?
+
     func setValue(
         _ newValue: Value?,
         withKeyPrefix keyPrefix: String,
@@ -14,53 +15,67 @@ public protocol DynamicPreferenceValueProvider {
     )
 }
 
-// Internal implementation detail for type erasure
+/// Type-erased box used by callers via `\Preferences.$prop`.
 public protocol AnyDynamicPreferenceValueProvider {
-    func value<P: PreferencesProtocol>(withKeyPrefix keyPrefix: String, using preferences: P) -> Any?
-    func setValue<P: PreferencesProtocol, V>(
-        _ newValue: V?,
+    func value(
         withKeyPrefix keyPrefix: String,
-        using preferences: P,
-        wrappedKeyPath: ReferenceWritableKeyPath<P, V?>
+        using preferences: any PreferencesProtocol
+    ) -> Any?
+
+    func setValue(
+        _ newValue: Any?,
+        withKeyPrefix keyPrefix: String,
+        using preferences: any PreferencesProtocol,
+        wrappedKeyPath: AnyKeyPath
     )
 }
 
-extension DynamicPreferenceValueProvider {
+public extension DynamicPreferenceValueProvider {
+    @inlinable
     func eraseToAnyDynamicPreferenceValueProvider() -> AnyDynamicPreferenceValueProvider {
-        DynamicPreferenceValueProviderWrapper(self)
+        _AnyDynamicPreferenceValueProviderBox(self)
     }
 }
 
-private struct DynamicPreferenceValueProviderWrapper<Base: DynamicPreferenceValueProvider>: AnyDynamicPreferenceValueProvider {
-    private let base: Base
+@usableFromInline
+struct _AnyDynamicPreferenceValueProviderBox<Base: DynamicPreferenceValueProvider>: AnyDynamicPreferenceValueProvider {
+    @usableFromInline let base: Base
+    @inlinable init(_ base: Base) { self.base = base }
 
-    init(_ base: Base) {
-        self.base = base
-    }
-
-    func value<P: PreferencesProtocol>(withKeyPrefix keyPrefix: String, using preferences: P) -> Any? {
-        guard let preferences = preferences as? Base.Preferences else {
+    @inlinable
+    func value(
+        withKeyPrefix keyPrefix: String,
+        using preferences: any PreferencesProtocol
+    ) -> Any? {
+        guard let prefs = preferences as? Base.Preferences else {
+            assertionFailure("Preferences mismatch: expected \(Base.Preferences.self), got \(type(of: preferences))")
             return nil
         }
-        return base.value(withKeyPrefix: keyPrefix, using: preferences)
+        return base.value(withKeyPrefix: keyPrefix, using: prefs)
     }
 
-    func setValue<P: PreferencesProtocol, V>(
-        _ newValue: V?,
+    @inlinable
+    func setValue(
+        _ newValue: Any?,
         withKeyPrefix keyPrefix: String,
-        using preferences: P,
-        wrappedKeyPath: ReferenceWritableKeyPath<P, V?>
+        using preferences: any PreferencesProtocol,
+        wrappedKeyPath: AnyKeyPath
     ) {
-        guard let preferences = preferences as? Base.Preferences else {
+        guard let prefs = preferences as? Base.Preferences else {
+            assertionFailure("Preferences mismatch: expected \(Base.Preferences.self), got \(type(of: preferences))")
+            return
+        }
+        guard let kp = wrappedKeyPath as? ReferenceWritableKeyPath<Base.Preferences, Base.Value?> else {
+            assertionFailure("KeyPath mismatch. Expected ReferenceWritableKeyPath<\(Base.Preferences.self), \(Base.Value?.self)>")
             return
         }
 
-        let castedKeyPath = wrappedKeyPath as! ReferenceWritableKeyPath<Base.Preferences, Base.Value?>
-
-        if let newValue = newValue as? Base.Value {
-            base.setValue(newValue, withKeyPrefix: keyPrefix, using: preferences, wrappedKeyPath: castedKeyPath)
+        if let typed = newValue as? Base.Value {
+            base.setValue(typed, withKeyPrefix: keyPrefix, using: prefs, wrappedKeyPath: kp)
         } else if newValue == nil {
-            base.setValue(nil, withKeyPrefix: keyPrefix, using: preferences, wrappedKeyPath: castedKeyPath)
+            base.setValue(nil, withKeyPrefix: keyPrefix, using: prefs, wrappedKeyPath: kp)
+        } else {
+            assertionFailure("Value mismatch. Expected \(Base.Value.self), got \(type(of: newValue))")
         }
     }
 }

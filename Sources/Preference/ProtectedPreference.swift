@@ -22,45 +22,22 @@ public struct ProtectedPreference<Value: PersistenceValue, Preferences: Keychain
         base = Preference(keyPath)
     }
 
-    /// Attempts to retrieve the value from a Keychain-backed `@Preference` using biometric or passcode authentication.
-    ///
-    /// > ⚠️ This should only be called on `Preference` properties that reference a `Keychain`-backed property in the `Preferences` type.
-    /// Calling this method on a non-Keychain-backed preference will return `nil` and may trigger a debug assertion.
-    ///
-    /// - Parameter prompt: The prompt shown to the user during authentication.
-    /// - Returns: The securely retrieved value, or `nil` if authentication fails or the preference is not Keychain-backed.
-    public subscript(prompt: String) -> Result<Value?, Error> {
-        guard let keychainWrapper = base.resolvePropertyWrapper() as? Keychain<Value, Preferences> else {
-            return .success(nil)
-        }
-        do {
-            return .success(try keychainWrapper.value(withPrompt: prompt, preferences: base.preferences))
-        } catch {
-            return .failure(error)
-        }
-    }
-
-    /// Attempts to retrieve the value from a Keychain-backed `@Preference` using biometric or passcode authentication.
-    ///
-    /// > ⚠️ This should only be called on `Preference` properties that reference a `Keychain`-backed property in the `Preferences` type.
-    /// Calling this method on a non-Keychain-backed preference will return `nil` and may trigger a debug assertion.
-    ///
-    /// - Parameter prompt: The prompt shown to the user during authentication.
-    /// - Parameter keyPrefix: A runtime string that scopes the preference.
-    /// - Parameter provider: A key path to the projected value (e.g. `\Preferences.$fileData`) that resolves
-    /// to the underlying storage provider conforming to `AnyDynamicPreferenceValueProvider`.
-    /// This identifies the exact property wrapper responsible for dynamic value management.
-    /// - Returns: The securely retrieved value, or `nil` if authentication fails or the preference is not Keychain-backed.
     public subscript(
         prompt: String,
-        keyPrefix: String,
-        provider providerKeyPath: KeyPath<Preferences, AnyDynamicPreferenceValueProvider>
+        keyPrefix: String? = nil,
+        provider providerKeyPath: KeyPath<Preferences, any AnyDynamicPreferenceValueProvider>
     ) -> Result<Value?, Error> {
-        guard let keychainWrapper = base.resolvePropertyWrapper() as? Keychain<Value, Preferences> else {
+        guard let keychainWrapper = base.preferences[keyPath: providerKeyPath] as? AnyPromptablePreferenceValueProvider else {
             return .success(nil)
         }
         do {
-            return .success(try keychainWrapper.value(withPrompt: prompt, preferences: base.preferences, keyPrefix: keyPrefix))
+            return .success(
+                try keychainWrapper.value(
+                    withPrompt: prompt,
+                    preferences: base.preferences,
+                    keyPrefix: keyPrefix
+                ) as? Value
+            )
         } catch {
             return .failure(error)
         }

@@ -1,12 +1,56 @@
 import Foundation
 
 @propertyWrapper
-public struct Keychain<Value: PersistenceValue, Preferences: KeychainPreferences>: DynamicPreferenceValueProvider {
+public struct Keychain<
+    Value: PersistenceValue,
+    Preferences: KeychainPreferences
+>: DynamicPreferenceValueProvider {
+    private struct Erased: AnyDynamicPreferenceValueProvider, AnyPromptablePreferenceValueProvider {
+        private let base: Keychain
+
+        init(_ base: Keychain) {
+            self.base = base
+        }
+
+        func value(withKeyPrefix keyPrefix: String, using preferences: any PreferencesProtocol) -> Any? {
+            base.value(withKeyPrefix: keyPrefix, using: preferences as! Preferences)
+        }
+        func setValue(
+            _ newValue: Any?,
+            withKeyPrefix keyPrefix: String,
+            using preferences: any PreferencesProtocol,
+            wrappedKeyPath: AnyKeyPath
+        ) {
+            base.setValue(
+                newValue as? Value,
+                withKeyPrefix: keyPrefix,
+                using: preferences as! Preferences,
+                wrappedKeyPath: wrappedKeyPath as! ReferenceWritableKeyPath<Preferences, Value?>
+            )
+        }
+
+        func value(
+            withPrompt prompt: String,
+            preferences: any PreferencesProtocol,
+            keyPrefix: String?
+        ) throws -> Any? {
+            guard let preferences = preferences as? Preferences else {
+                assertionFailure("Preferences mismatch: expected \(Preferences.self), got \(type(of: preferences))")
+                return nil
+            }
+            return try base.value(
+                withPrompt: prompt,
+                preferences: preferences,
+                keyPrefix: keyPrefix
+            )
+        }
+    }
+
     let defaultValue: Value?
     let key: String
 
-    public var projectedValue: any AnyDynamicPreferenceValueProvider {
-        eraseToAnyDynamicPreferenceValueProvider()
+    public var projectedValue: AnyDynamicPreferenceValueProvider {
+        Erased(self)
     }
 
     public var wrappedValue: Value? {
@@ -109,7 +153,7 @@ public struct Keychain<Value: PersistenceValue, Preferences: KeychainPreferences
         setValue(newValue, withKey: key.withPrefix(keyPrefix), using: preferences, wrappedKeyPath: wrappedKeyPath)
     }
 
-    func value(withPrompt prompt: String, preferences: Preferences, keyPrefix: String? = nil) throws -> Value? {
+    public func value(withPrompt prompt: String, preferences: Preferences, keyPrefix: String? = nil) throws -> Value? {
         let key = if let keyPrefix {
             key.withPrefix(keyPrefix)
         } else {

@@ -53,7 +53,7 @@ final class FileTests: XCTestCase {
         let testDynamicValue = "testDynamicValue"
 
         testKey = testValue
-        _testKey["testDynamicKey", provider: \FileMockPreferences.$testKey] = testDynamicValue
+        _testKey[keyPrefix: "testDynamicKey", provider: \FileMockPreferences.$testKey] = testDynamicValue
         let value = try? JSONDecoder().decode(String.self, from: mockPreferences.fileDataStore["[testDynamicKey] test.key"]!)
         XCTAssertEqual(value, testDynamicValue)
         XCTAssertEqual(testKeyFileValue(), testValue)

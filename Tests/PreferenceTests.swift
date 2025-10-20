@@ -60,6 +60,6 @@ final class PreferenceTests: XCTestCase {
     }
 
     func testNilDynamicPreference() {
-        XCTAssertNil(_testKey["DynamicKey", provider: \FileMockPreferences.$testKey])
+        XCTAssertNil(_testKey[keyPrefix: "DynamicKey", provider: \FileMockPreferences.$testKey])
     }
 }
