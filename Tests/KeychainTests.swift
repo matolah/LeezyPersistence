@@ -70,7 +70,23 @@ final class KeychainTests: XCTestCase {
         let testValue = "TestValue"
 
         testKey = testValue
-        XCTAssertEqual(_testPromptKey["Prompt"], testValue)
+        switch _testPromptKey["Prompt"] {
+        case .success(let value):
+            XCTAssertEqual(value, testValue)
+        case .failure:
+            XCTFail("Failed to resolve Keychain protected value")
+        }
+        XCTAssertEqual(keychainManager.promptMessagePassed, "Prompt")
+    }
+
+    func testKeychainValueWithPromptAndError() throws {
+        keychainManager.error = NSError()
+        switch _testPromptKey["Prompt"] {
+        case .success:
+            XCTFail("Failed to resolve Keychain protected value")
+        case .failure:
+            return
+        }
         XCTAssertEqual(keychainManager.promptMessagePassed, "Prompt")
     }
 

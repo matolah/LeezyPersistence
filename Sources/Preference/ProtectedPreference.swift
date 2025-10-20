@@ -29,15 +29,14 @@ public struct ProtectedPreference<Value: PersistenceValue, Preferences: Keychain
     ///
     /// - Parameter prompt: The prompt shown to the user during authentication.
     /// - Returns: The securely retrieved value, or `nil` if authentication fails or the preference is not Keychain-backed.
-    public subscript(prompt: String) -> Value? {
-        get {
-            guard let keychainWrapper = base.resolvePropertyWrapper() as? Keychain<Value, Preferences> else {
-                return nil
-            }
-            return keychainWrapper.value(withPrompt: prompt, preferences: base.preferences)
+    public subscript(prompt: String) -> Result<Value?, Error> {
+        guard let keychainWrapper = base.resolvePropertyWrapper() as? Keychain<Value, Preferences> else {
+            return .success(nil)
         }
-        set {
-            base.wrappedValue = newValue
+        do {
+            return .success(try keychainWrapper.value(withPrompt: prompt, preferences: base.preferences))
+        } catch {
+            return .failure(error)
         }
     }
 
@@ -56,16 +55,19 @@ public struct ProtectedPreference<Value: PersistenceValue, Preferences: Keychain
         prompt: String,
         keyPrefix: String,
         provider providerKeyPath: KeyPath<Preferences, AnyDynamicPreferenceValueProvider>
-    ) -> Value? {
-        get {
-            guard let keychainWrapper = base.resolvePropertyWrapper() as? Keychain<Value, Preferences> else {
-                return nil
-            }
-            return keychainWrapper.value(withPrompt: prompt, preferences: base.preferences, keyPrefix: keyPrefix)
+    ) -> Result<Value?, Error> {
+        guard let keychainWrapper = base.resolvePropertyWrapper() as? Keychain<Value, Preferences> else {
+            return .success(nil)
         }
-        set {
-            base.wrappedValue = newValue
+        do {
+            return .success(try keychainWrapper.value(withPrompt: prompt, preferences: base.preferences, keyPrefix: keyPrefix))
+        } catch {
+            return .failure(error)
         }
+    }
+
+    public func setValue(_ value: Value?) {
+        base.wrappedValue = value
     }
 
     public func addSubscriber(onReceiveValue: @escaping (Value?) -> Void) -> AnyCancellable {

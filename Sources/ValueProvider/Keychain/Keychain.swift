@@ -53,10 +53,15 @@ public struct Keychain<Value: PersistenceValue, Preferences: KeychainPreferences
         storage storageKeyPath: ReferenceWritableKeyPath<Preferences, Self>
     ) -> Value? {
         let keychain = instance[keyPath: storageKeyPath]
-        return keychain.value(withKey: keychain.key, using: instance)
+        return try? keychain.value(withKey: keychain.key, using: instance)
     }
 
-    private func value(withKey key: String, using preferences: Preferences, promptMessage: String? = nil) -> Value? {
+    private func value(
+        withKey key: String,
+        using preferences: Preferences,
+        promptMessage: String? = nil,
+        shouldThrowError: Bool = false
+    ) throws -> Value? {
         do {
             guard let data = try preferences.keychainManager.load(key, withPromptMessage: promptMessage) else {
                 return defaultValue
@@ -64,7 +69,11 @@ public struct Keychain<Value: PersistenceValue, Preferences: KeychainPreferences
             return try? PersistenceCoder.decode(Value.self, from: data)
         } catch {
             preferences.handle(error: error)
-            return defaultValue
+            if shouldThrowError {
+                throw error
+            } else {
+                return defaultValue
+            }
         }
     }
 
@@ -74,7 +83,7 @@ public struct Keychain<Value: PersistenceValue, Preferences: KeychainPreferences
         using preferences: Preferences,
         wrappedKeyPath: ReferenceWritableKeyPath<Preferences, V?>
     ) {
-        guard value(withKey: key, using: preferences) != newValue else {
+        guard (try? value(withKey: key, using: preferences)) != newValue else {
             return
         }
 
@@ -88,7 +97,7 @@ public struct Keychain<Value: PersistenceValue, Preferences: KeychainPreferences
     }
 
     public func value(withKeyPrefix keyPrefix: String, using preferences: Preferences) -> Value? {
-        return value(withKey: key.withPrefix(keyPrefix), using: preferences)
+        return try? value(withKey: key.withPrefix(keyPrefix), using: preferences)
     }
 
     public func setValue<V>(
@@ -100,12 +109,12 @@ public struct Keychain<Value: PersistenceValue, Preferences: KeychainPreferences
         setValue(newValue, withKey: key.withPrefix(keyPrefix), using: preferences, wrappedKeyPath: wrappedKeyPath)
     }
 
-    func value(withPrompt prompt: String, preferences: Preferences, keyPrefix: String? = nil) -> Value? {
+    func value(withPrompt prompt: String, preferences: Preferences, keyPrefix: String? = nil) throws -> Value? {
         let key = if let keyPrefix {
             key.withPrefix(keyPrefix)
         } else {
             key
         }
-        return value(withKey: key, using: preferences, promptMessage: prompt)
+        return try value(withKey: key, using: preferences, promptMessage: prompt, shouldThrowError: true)
     }
 }
