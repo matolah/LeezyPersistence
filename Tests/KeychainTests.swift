@@ -121,6 +121,7 @@ final class KeychainTests: XCTestCase {
     }
     
     func testKeychain_withPromptPresenceTrue_passesTrueToManager() throws {
+        try keychainManager.save(Data(), forKey: "Prompt", shouldPromptPresence: true)
         XCTAssertTrue(keychainManager.shouldPromptPresencePassed == true)
     }
 

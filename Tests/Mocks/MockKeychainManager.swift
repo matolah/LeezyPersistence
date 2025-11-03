@@ -16,19 +16,16 @@ class MockKeychainManager: KeychainManagerProtocol {
         promptMessagePassed = promptMessage
         return values[key]
     }
-
-    func save(_ value: Data, forKey key: String) throws {
-        if let error {
-            throw error
-        }
-        values[key] = value
-    }
     
-    func save(_ value: Data, forKey key: String, shouldPromptPresence: Bool) throws {
-        shouldPromptPresencePassed = shouldPromptPresence
+    func save(
+        _ value: Data,
+        forKey key: String,
+        shouldPromptPresence: Bool
+    ) throws {
         if let error {
             throw error
         }
+        shouldPromptPresencePassed = shouldPromptPresence
         values[key] = value
     }
 }
