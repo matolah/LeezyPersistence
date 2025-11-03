@@ -119,4 +119,12 @@ final class KeychainTests: XCTestCase {
         XCTAssertEqual(mockViewModel.testKey, "Mock123")
         wait(for: [expectation])
     }
+    
+    func testKeychain_withPromptPresenceTrue_passesTrueToManager() throws {
+        XCTAssertTrue(keychainManager.shouldPromptPresencePassed == true)
+    }
+
+    func testKeychain_withPromptPresenceFalse_passesFalseToManager() throws {
+        XCTAssertFalse(keychainManager.shouldPromptPresencePassed == false)
+    }
 }

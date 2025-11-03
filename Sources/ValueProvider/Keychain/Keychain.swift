@@ -46,6 +46,7 @@ public struct Keychain<
         }
     }
 
+    let shouldPromptPresence: Bool
     let defaultValue: Value?
     let key: String
 
@@ -63,9 +64,14 @@ public struct Keychain<
         }
     }
 
-    public init(wrappedValue: Value? = nil, _ key: String) {
+    public init(
+        wrappedValue: Value? = nil,
+        _ key: String,
+        shouldPromptPresence: Bool = false
+    ) {
         defaultValue = wrappedValue
         self.key = key
+        self.shouldPromptPresence = shouldPromptPresence
     }
 
     public static subscript(
@@ -84,7 +90,11 @@ public struct Keychain<
             do {
                 let encoded = try PersistenceCoder.encode(newValue)
                 let value = instance[keyPath: storageKeyPath]
-                try instance.keychainManager.save(encoded, forKey: value.key)
+                try instance.keychainManager.save(
+                    encoded,
+                    forKey: value.key,
+                    shouldPromptPresence: value.shouldPromptPresence
+                )
                 instance.preferencesChangedSubject.send(wrappedKeyPath)
             } catch {
                 instance.handle(error: error)
@@ -133,7 +143,11 @@ public struct Keychain<
 
         do {
             let encoded = try PersistenceCoder.encode(newValue)
-            try preferences.keychainManager.save(encoded, forKey: key)
+            try preferences.keychainManager.save(
+                encoded,
+                forKey: key,
+                shouldPromptPresence: shouldPromptPresence
+            )
             preferences.preferencesChangedSubject.send(wrappedKeyPath)
         } catch {
             preferences.handle(error: error)
