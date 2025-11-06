@@ -62,7 +62,7 @@ public struct Keychain<
             }
             base.setValuePromptingPresence(
                 newValue as? Value,
-                withKeyPrefix: keyPrefix ?? "",
+                withKeyPrefix: keyPrefix,
                 using: preferences,
                 wrappedKeyPath: kp
             )
@@ -179,19 +179,22 @@ public struct Keychain<
 
     fileprivate func setValuePromptingPresence<V>(
         _ newValue: Value?,
-        withKeyPrefix keyPrefix: String,
+        withKeyPrefix keyPrefix: String?,
         using preferences: Preferences,
         wrappedKeyPath: ReferenceWritableKeyPath<Preferences, V?>
     ) {
-        setValue(newValue, withKey: key.withPrefix(keyPrefix), shouldPromptPresence: true, using: preferences, wrappedKeyPath: wrappedKeyPath)
+        setValue(newValue, withKey: keyWithPrefix(keyPrefix), shouldPromptPresence: true, using: preferences, wrappedKeyPath: wrappedKeyPath)
     }
 
-    public func value(withPrompt prompt: String, preferences: Preferences, keyPrefix: String? = nil) throws -> Value? {
-        let key = if let keyPrefix {
+    private func keyWithPrefix(_ keyPrefix: String?) -> String {
+        if let keyPrefix, !keyPrefix.isEmpty {
             key.withPrefix(keyPrefix)
         } else {
             key
         }
-        return try value(withKey: key, using: preferences, promptMessage: prompt, shouldThrowError: true)
+    }
+
+    public func value(withPrompt prompt: String, preferences: Preferences, keyPrefix: String? = nil) throws -> Value? {
+        try value(withKey: keyWithPrefix(keyPrefix), using: preferences, promptMessage: prompt, shouldThrowError: true)
     }
 }

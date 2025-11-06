@@ -69,7 +69,7 @@ final class KeychainTests: XCTestCase {
     func testKeychainValueWithPrompt() throws {
         let testValue = "TestValue"
 
-        testKey = testValue
+        testPromptKey = testValue
         switch _testPromptKey["Prompt"] {
         case .success(let value):
             XCTAssertEqual(value, testValue)
@@ -118,5 +118,26 @@ final class KeychainTests: XCTestCase {
         testKey = "Mock123"
         XCTAssertEqual(mockViewModel.testKey, "Mock123")
         wait(for: [expectation])
+    }
+
+    func testProtectedPreferenceWithKeyPrefix() throws {
+        let testValue = "TestValue"
+        let customKey = "[CustomPrefix] testKey"
+
+        _testPromptKey.setValue(testValue, keyPrefix: "CustomPrefix")
+
+        let data = try keychainManager.load(customKey, withPromptMessage: "Prompt")
+        let value = try? JSONDecoder().decode(String.self, from: data!)
+        XCTAssertEqual(value, testValue)
+        XCTAssertEqual(keychainManager.promptMessagePassed, "Prompt")
+    }
+
+    func testProtectedPreferenceWithEmptyKeyPrefix() throws {
+        let testValue = "TestValue"
+
+        testPromptKey = testValue
+        let keychainValue = testKeyKeychainValue()
+        XCTAssertEqual(keychainValue, testValue)
+        XCTAssertNil(keychainManager.values["[] testKey"])
     }
 }

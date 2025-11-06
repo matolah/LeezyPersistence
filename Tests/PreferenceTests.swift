@@ -62,4 +62,12 @@ final class PreferenceTests: XCTestCase {
     func testNilDynamicPreference() {
         XCTAssertNil(_testKey[keyPrefix: "DynamicKey", provider: \FileMockPreferences.$testKey])
     }
+
+    func testDynamicPreferenceRead() {
+        let expectedValue = Data()
+        _testKey[keyPrefix: "ReadTestKey", provider: \FileMockPreferences.$testKey] = expectedValue
+
+        let actualValue = _testKey[keyPrefix: "ReadTestKey", provider: \FileMockPreferences.$testKey]
+        XCTAssertEqual(actualValue, expectedValue)
+    }
 }
