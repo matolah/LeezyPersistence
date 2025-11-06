@@ -6,4 +6,10 @@ public protocol AnyPromptablePreferenceValueProvider {
         preferences: any PreferencesProtocol,
         keyPrefix: String?
     ) throws -> Any?
+    func setValuePromptingPresence(
+        _ newValue: Any?,
+        withKeyPrefix keyPrefix: String?,
+        using preferences: any PreferencesProtocol,
+        wrappedKeyPath: AnyKeyPath
+    )
 }

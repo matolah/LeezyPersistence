@@ -15,6 +15,7 @@ public struct Keychain<
         func value(withKeyPrefix keyPrefix: String, using preferences: any PreferencesProtocol) -> Any? {
             base.value(withKeyPrefix: keyPrefix, using: preferences as! Preferences)
         }
+        
         func setValue(
             _ newValue: Any?,
             withKeyPrefix keyPrefix: String,
@@ -42,6 +43,28 @@ public struct Keychain<
                 withPrompt: prompt,
                 preferences: preferences,
                 keyPrefix: keyPrefix
+            )
+        }
+
+        func setValuePromptingPresence(
+            _ newValue: Any?,
+            withKeyPrefix keyPrefix: String?,
+            using preferences: any PreferencesProtocol,
+            wrappedKeyPath: AnyKeyPath
+        ) {
+            guard let preferences = preferences as? Preferences else {
+                assertionFailure("Preferences mismatch: expected \(Preferences.self), got \(type(of: preferences))")
+                return
+            }
+            guard let kp = wrappedKeyPath as? ReferenceWritableKeyPath<Preferences, Value?> else {
+                assertionFailure("KeyPath mismatch. Expected ReferenceWritableKeyPath<\(Preferences.self), \(Value?.self)>")
+                return
+            }
+            base.setValuePromptingPresence(
+                newValue as? Value,
+                withKeyPrefix: keyPrefix ?? "",
+                using: preferences,
+                wrappedKeyPath: kp
             )
         }
     }
@@ -124,6 +147,7 @@ public struct Keychain<
     private func setValue<V>(
         _ newValue: Value?,
         withKey key: String,
+        shouldPromptPresence: Bool = false,
         using preferences: Preferences,
         wrappedKeyPath: ReferenceWritableKeyPath<Preferences, V?>
     ) {
@@ -133,7 +157,7 @@ public struct Keychain<
 
         do {
             let encoded = try PersistenceCoder.encode(newValue)
-            try preferences.keychainManager.save(encoded, forKey: key)
+            try preferences.keychainManager.save(encoded, forKey: key, shouldPromptPresence: shouldPromptPresence)
             preferences.preferencesChangedSubject.send(wrappedKeyPath)
         } catch {
             preferences.handle(error: error)
@@ -151,6 +175,15 @@ public struct Keychain<
         wrappedKeyPath: ReferenceWritableKeyPath<Preferences, V?>
     ) {
         setValue(newValue, withKey: key.withPrefix(keyPrefix), using: preferences, wrappedKeyPath: wrappedKeyPath)
+    }
+
+    fileprivate func setValuePromptingPresence<V>(
+        _ newValue: Value?,
+        withKeyPrefix keyPrefix: String,
+        using preferences: Preferences,
+        wrappedKeyPath: ReferenceWritableKeyPath<Preferences, V?>
+    ) {
+        setValue(newValue, withKey: key.withPrefix(keyPrefix), shouldPromptPresence: true, using: preferences, wrappedKeyPath: wrappedKeyPath)
     }
 
     public func value(withPrompt prompt: String, preferences: Preferences, keyPrefix: String? = nil) throws -> Value? {

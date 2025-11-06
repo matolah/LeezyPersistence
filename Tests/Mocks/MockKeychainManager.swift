@@ -16,7 +16,7 @@ class MockKeychainManager: KeychainManagerProtocol {
         return values[key]
     }
 
-    func save(_ value: Data, forKey key: String) throws {
+    func save(_ value: Data, forKey key: String, shouldPromptPresence: Bool) throws {
         if let error {
             throw error
         }

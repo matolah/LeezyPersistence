@@ -20,7 +20,7 @@ final class KeychainTests: XCTestCase {
     }
 
     @Preference(\KeychainMockPreferences.testKey) var testKey
-    @ProtectedPreference(\KeychainMockPreferences.testKey) var testPromptKey
+    @ProtectedPreference(\KeychainMockPreferences.testKey, providerKeyPath: \KeychainMockPreferences.$testKey) var testPromptKey
 
     private var mockPreferences: KeychainMockPreferences!
     private var keychainManager: MockKeychainManager!
@@ -70,7 +70,7 @@ final class KeychainTests: XCTestCase {
         let testValue = "TestValue"
 
         testKey = testValue
-        switch _testPromptKey["Prompt", provider: \KeychainMockPreferences.$testKey] {
+        switch _testPromptKey["Prompt"] {
         case .success(let value):
             XCTAssertEqual(value, testValue)
         case .failure:
@@ -86,7 +86,7 @@ final class KeychainTests: XCTestCase {
             throw XCTSkip("Skipping keychain prompt test on CI (no UI session).")
         }
         #endif
-        switch _testPromptKey["Prompt", provider: \KeychainMockPreferences.$testKey] {
+        switch _testPromptKey["Prompt"] {
         case .success:
             XCTFail("Failed to resolve Keychain protected value")
         case .failure:
